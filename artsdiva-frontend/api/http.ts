@@ -21,10 +21,14 @@ export async function apiRequest<TResponse>(
   path: string,
   options: RequestInit = {}
 ): Promise<TResponse> {
+  // FormData (file uploads) must NOT get a manual Content-Type — the
+  // browser needs to set its own multipart boundary.
+  const isFormData = options.body instanceof FormData;
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...options.headers },
+    headers: isFormData ? { ...options.headers } : { "Content-Type": "application/json", ...options.headers },
   });
 
   const body: unknown = await res.json().catch(() => null);
