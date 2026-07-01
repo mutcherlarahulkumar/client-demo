@@ -1,0 +1,41 @@
+// Shared fetch wrapper used by every api/*.api.ts file. Not itself an
+// "api file" for a domain — those live alongside it (auth.api.ts, etc.).
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+interface ApiErrorBody {
+  message?: string;
+}
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export async function apiRequest<TResponse>(
+  path: string,
+  options: RequestInit = {}
+): Promise<TResponse> {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...options.headers },
+  });
+
+  const body: unknown = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const message =
+      body && typeof body === "object" && "message" in body
+        ? String((body as ApiErrorBody).message)
+        : `Request failed with status ${res.status}`;
+    throw new ApiError(message, res.status);
+  }
+
+  return body as TResponse;
+}
