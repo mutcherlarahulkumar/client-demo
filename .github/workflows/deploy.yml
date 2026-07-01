@@ -1,0 +1,113 @@
+name: Build and deploy
+
+# Builds backend + frontend images, pushes them to GHCR, then SSHes into the
+# remote Docker host and redeploys via docker-compose.prod.yml. Prisma schema
+# changes are applied automatically by the backend's entrypoint (`prisma db
+# push`) on every restart — no separate migration step needed here.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      backend_image: ${{ steps.vars.outputs.backend_image }}
+      frontend_image: ${{ steps.vars.outputs.frontend_image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image names
+        id: vars
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          SHA=$(echo "${{ github.sha }}" | cut -c1-12)
+          echo "backend_image=ghcr.io/$OWNER/artsdiva-backend:$SHA" >> "$GITHUB_OUTPUT"
+          echo "frontend_image=ghcr.io/$OWNER/artsdiva-frontend:$SHA" >> "$GITHUB_OUTPUT"
+          echo "backend_latest=ghcr.io/$OWNER/artsdiva-backend:latest" >> "$GITHUB_OUTPUT"
+          echo "frontend_latest=ghcr.io/$OWNER/artsdiva-frontend:latest" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./artsdiva-backend
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.backend_image }}
+            ${{ steps.vars.outputs.backend_latest }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./artsdiva-frontend
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.PUBLIC_API_URL }}
+          tags: |
+            ${{ steps.vars.outputs.frontend_image }}
+            ${{ steps.vars.outputs.frontend_latest }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy production compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: "docker-compose.prod.yml"
+          target: "~/artsdiva"
+          strip_components: 0
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          envs: BACKEND_IMAGE,FRONTEND_IMAGE,DATABASE_URL,JWT_SECRET,JWT_EXPIRES_IN,CLIENT_ORIGIN,SEED_ADMIN_EMAIL,SEED_ADMIN_PASSWORD,SEED_ADMIN_NAME
+          script: |
+            set -e
+            cd ~/artsdiva
+            export BACKEND_IMAGE FRONTEND_IMAGE DATABASE_URL JWT_SECRET JWT_EXPIRES_IN CLIENT_ORIGIN SEED_ADMIN_EMAIL SEED_ADMIN_PASSWORD SEED_ADMIN_NAME
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+        env:
+          BACKEND_IMAGE: ${{ needs.build-and-push.outputs.backend_image }}
+          FRONTEND_IMAGE: ${{ needs.build-and-push.outputs.frontend_image }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
+          CLIENT_ORIGIN: ${{ secrets.CLIENT_ORIGIN }}
+          SEED_ADMIN_EMAIL: ${{ secrets.SEED_ADMIN_EMAIL }}
+          SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
+          SEED_ADMIN_NAME: ${{ secrets.SEED_ADMIN_NAME }}

@@ -1,0 +1,45 @@
+# Production compose file — run on the remote Docker host (Oracle Cloud
+# Ampere A1 VM). Unlike docker-compose.yml (local dev), this does NOT build
+# images or run a self-hosted Mongo: it pulls prebuilt images from GHCR and
+# points the backend at a MongoDB Atlas free-tier cluster.
+#
+# Image tags and secrets are supplied as environment variables at deploy
+# time (see .github/workflows/deploy.yml) — this file is never edited by
+# hand on the server.
+
+services:
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: artsdiva-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      PORT: "4000"
+      NODE_ENV: production
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-ArtsDiva Admin}
+    ports:
+      - "4000:4000"
+    networks:
+      - artsdiva
+
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    container_name: artsdiva-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    networks:
+      - artsdiva
+
+networks:
+  artsdiva:
+    driver: bridge
