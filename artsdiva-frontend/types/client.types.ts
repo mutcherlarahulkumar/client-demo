@@ -1,7 +1,7 @@
 import type { ContactInfo } from "./common.types";
+import type { Artwork } from "./artwork.types";
+import type { Lease } from "./lease.types";
 
-// Minimal shape needed by other modules (e.g. an Artwork's active lease
-// client). Expanded with DTOs/query types when the Client module is built.
 export interface Client {
   id: string;
   name: string;
@@ -10,4 +10,23 @@ export interface Client {
   notes?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ClientWithLeaseHistory extends Client {
+  leases: Array<Lease & { artwork: Pick<Artwork, "id" | "title" | "images" | "status"> }>;
+}
+
+export interface CreateClientDTO {
+  name: string;
+  contactInfo?: ContactInfo;
+  preferences?: string;
+  notes?: string;
+}
+
+export type UpdateClientDTO = Partial<CreateClientDTO>;
+
+export interface ListClientsParams {
+  search?: string;
+  page?: number;
+  limit?: number;
 }
