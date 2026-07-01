@@ -1,8 +1,9 @@
 import "dotenv/config";
-import express, { type Request, type Response } from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { prisma } from "./lib/prisma";
+import authRoutes from "./routes/auth.routes";
 
 // ---------------------------------------------------------------------------
 // Phase 1 scaffold bootstrap.
@@ -36,8 +37,17 @@ app.get("/health/db", async (_req: Request, res: Response) => {
   }
 });
 
-// TODO(Phase 1): mount /api/auth, /api/artworks, /api/artists,
-// /api/clients, /api/leases here.
+app.use("/api/auth", authRoutes);
+
+// TODO(Phase 1): mount /api/artworks, /api/artists, /api/clients, /api/leases here.
+
+// Central error handler — catches anything forwarded via next(err),
+// including rejected promises from asyncHandler-wrapped controllers.
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  // eslint-disable-next-line no-console
+  console.error(err);
+  res.status(500).json({ message: "Internal server error" });
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
