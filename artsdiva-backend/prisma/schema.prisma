@@ -1,0 +1,192 @@
+// ArtsDiva IMS — Prisma schema
+// Datastore: MongoDB (Prisma MongoDB connector)
+// Phase 1 models: User, Artist, Artwork, Client, Lease (+ DocumentLog stretch)
+//
+// MongoDB conventions used throughout:
+//   - Primary keys:      id String @id @default(auto()) @map("_id") @db.ObjectId
+//   - Relation scalars:  <fk>Id String @db.ObjectId
+//   - Embedded objects:  Prisma `type` (composite types), e.g. ContactInfo
+//   - Scalar lists:      String[] (natively supported by MongoDB)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum MouStatus {
+  SIGNED
+  PENDING
+  NOT_REQUIRED
+}
+
+enum ArtworkStatus {
+  IN_COLLECTION
+  ON_LEASE
+  SOLD
+}
+
+enum LeaseStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum DocumentRelatedType {
+  ARTIST
+  CLIENT
+}
+
+enum DocumentFileType {
+  MOU
+  CONTRACT
+  CORRESPONDENCE
+  OTHER
+}
+
+// ---------------------------------------------------------------------------
+// Embedded (composite) types
+// ---------------------------------------------------------------------------
+
+/// Embedded contact block shared by Artist and Client.
+/// Stored inline on the parent document (not a separate collection).
+type ContactInfo {
+  email   String?
+  phone   String?
+  address String?
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String @unique
+  passwordHash String
+  role         Role   @default(STAFF)
+
+  // Documents this user uploaded (stretch: DocumentLog).
+  uploadedDocuments DocumentLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Artist {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  bio             String? // long text, optional
+  contactInfo     ContactInfo? // embedded object, optional
+  commissionTerms String // e.g. "30% on sale"
+  mouStatus       MouStatus    @default(PENDING)
+
+  // One artist -> many artworks.
+  artworks Artwork[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Artwork {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  medium          String
+  dimensions      String // e.g. "24x36 in"
+  year            Int
+  acquisitionDate DateTime
+  status          ArtworkStatus @default(IN_COLLECTION)
+  images          String[] // URLs to blob storage
+  notes           String?
+
+  // Relation: Artwork -> Artist (many-to-one).
+  artistId String @db.ObjectId
+  artist   Artist @relation(fields: [artistId], references: [id])
+
+  // One artwork -> many leases (its lease history).
+  leaseHistory Lease[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([artistId])
+  @@index([status])
+  @@index([title])
+}
+
+model Client {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  contactInfo ContactInfo? // embedded object, optional
+  preferences String? // free text, optional
+  notes       String?
+
+  // One client -> many leases (its lease history).
+  leases Lease[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+/// Join entity that makes Artwork <-> Client relational and drives
+/// lease history on both sides.
+model Lease {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  startDate DateTime
+  endDate   DateTime? // null = currently active / open-ended
+  terms     String? // rate, conditions
+  status    LeaseStatus @default(ACTIVE)
+
+  artworkId String  @db.ObjectId
+  artwork   Artwork @relation(fields: [artworkId], references: [id])
+
+  clientId String @db.ObjectId
+  client   Client @relation(fields: [clientId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([artworkId])
+  @@index([clientId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Stretch goal — build after core modules are complete.
+// ---------------------------------------------------------------------------
+
+model DocumentLog {
+  id            String              @id @default(auto()) @map("_id") @db.ObjectId
+  relatedToType DocumentRelatedType
+  // Polymorphic reference: points to an Artist OR a Client depending on
+  // relatedToType. MongoDB/Prisma has no native polymorphic relation, so this
+  // is a manual ObjectId reference (no @relation) resolved in the service layer.
+  relatedToId   String              @db.ObjectId
+  fileUrl       String
+  fileType      DocumentFileType
+  uploadedAt    DateTime            @default(now())
+
+  // Relation: DocumentLog -> User (who uploaded it).
+  uploadedBy String @db.ObjectId
+  uploader   User   @relation(fields: [uploadedBy], references: [id])
+
+  @@index([relatedToType, relatedToId])
+  @@index([uploadedBy])
+}

@@ -1,0 +1,32 @@
+# Root .gitignore for the whole ArtsDiva monorepo (single git repo covering
+# artsdiva-backend/ and artsdiva-frontend/). Nested .gitignore files in each
+# subproject still apply on top of this.
+
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# builds
+dist/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# misc
+.DS_Store
+*.pem
+.vercel
