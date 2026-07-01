@@ -1,5 +1,8 @@
 node_modules/
 dist/
+prisma/*.js
+prisma/*.d.ts
+prisma/*.js.map
 .env
 .env.local
 *.log
