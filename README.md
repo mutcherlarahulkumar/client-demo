@@ -104,6 +104,7 @@ Repo → **Settings → Secrets and variables → Actions → New repository sec
 | `CLIENT_ORIGIN` | Public frontend URL, e.g. `http://<VM_IP>:3000` (CORS) |
 | `PUBLIC_API_URL` | Public backend URL, e.g. `http://<VM_IP>:4000` (baked into the frontend build as `NEXT_PUBLIC_API_URL`) |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` / `SEED_ADMIN_NAME` | Optional — auto-creates the initial admin on first deploy (skipped if it already exists) |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token — needed for Artwork image uploads (`POST /api/artworks/:id/images`) |
 
 No registry secret is needed — the workflow pushes to GHCR using the
 built-in `GITHUB_TOKEN`, and the images are public so the VM can `docker pull`

@@ -93,11 +93,11 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          envs: BACKEND_IMAGE,FRONTEND_IMAGE,DATABASE_URL,JWT_SECRET,JWT_EXPIRES_IN,CLIENT_ORIGIN,SEED_ADMIN_EMAIL,SEED_ADMIN_PASSWORD,SEED_ADMIN_NAME
+          envs: BACKEND_IMAGE,FRONTEND_IMAGE,DATABASE_URL,JWT_SECRET,JWT_EXPIRES_IN,CLIENT_ORIGIN,SEED_ADMIN_EMAIL,SEED_ADMIN_PASSWORD,SEED_ADMIN_NAME,BLOB_READ_WRITE_TOKEN
           script: |
             set -e
             cd ~/artsdiva
-            export BACKEND_IMAGE FRONTEND_IMAGE DATABASE_URL JWT_SECRET JWT_EXPIRES_IN CLIENT_ORIGIN SEED_ADMIN_EMAIL SEED_ADMIN_PASSWORD SEED_ADMIN_NAME
+            export BACKEND_IMAGE FRONTEND_IMAGE DATABASE_URL JWT_SECRET JWT_EXPIRES_IN CLIENT_ORIGIN SEED_ADMIN_EMAIL SEED_ADMIN_PASSWORD SEED_ADMIN_NAME BLOB_READ_WRITE_TOKEN
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
             docker image prune -f
@@ -111,3 +111,4 @@ jobs:
           SEED_ADMIN_EMAIL: ${{ secrets.SEED_ADMIN_EMAIL }}
           SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
           SEED_ADMIN_NAME: ${{ secrets.SEED_ADMIN_NAME }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
