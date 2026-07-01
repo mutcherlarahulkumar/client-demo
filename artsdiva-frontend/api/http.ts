@@ -39,3 +39,14 @@ export async function apiRequest<TResponse>(
 
   return body as TResponse;
 }
+
+// Shared by every list/search endpoint that takes optional filter params.
+export function buildQueryString(params?: object): string {
+  if (!params) return "";
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
