@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { createArtist, updateArtist } from "@artsdiva/api/artist.api";
 import { useArtist } from "@artsdiva/hooks/useArtist";
@@ -27,19 +27,22 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (artist) {
-      setValues({
-        name: artist.name,
-        bio: artist.bio ?? "",
-        email: artist.contactInfo?.email ?? "",
-        phone: artist.contactInfo?.phone ?? "",
-        address: artist.contactInfo?.address ?? "",
-        commissionTerms: artist.commissionTerms,
-        mouStatus: artist.mouStatus,
-      });
-    }
-  }, [artist]);
+  // Adjust form state when the fetched artist arrives, computed during
+  // render rather than in an effect (avoids an extra render pass — see
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes).
+  const [loadedArtistId, setLoadedArtistId] = useState<string | undefined>(undefined);
+  if (artist && artist.id !== loadedArtistId) {
+    setLoadedArtistId(artist.id);
+    setValues({
+      name: artist.name,
+      bio: artist.bio ?? "",
+      email: artist.contactInfo?.email ?? "",
+      phone: artist.contactInfo?.phone ?? "",
+      address: artist.contactInfo?.address ?? "",
+      commissionTerms: artist.commissionTerms,
+      mouStatus: artist.mouStatus,
+    });
+  }
 
   const handleChange = <K extends keyof ArtistFormValues>(field: K, value: ArtistFormValues[K]): void => {
     setValues((prev) => ({ ...prev, [field]: value }));

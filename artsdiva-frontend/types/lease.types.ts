@@ -1,5 +1,3 @@
-// Minimal shape needed by other modules (e.g. an Artwork's active lease).
-// Expanded with DTOs/query types when the Lease module is built.
 export type LeaseStatus = "ACTIVE" | "COMPLETED" | "CANCELLED";
 
 export interface Lease {
@@ -12,4 +10,19 @@ export interface Lease {
   status: LeaseStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateLeaseDTO {
+  artworkId: string;
+  clientId: string;
+  startDate: string;
+  endDate?: string;
+  terms?: string;
+}
+
+export interface ListLeasesParams {
+  artworkId?: string;
+  clientId?: string;
+  page?: number;
+  limit?: number;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { createClient, updateClient } from "@artsdiva/api/client.api";
 import { useClient } from "@artsdiva/hooks/useClient";
@@ -26,18 +26,21 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (client) {
-      setValues({
-        name: client.name,
-        email: client.contactInfo?.email ?? "",
-        phone: client.contactInfo?.phone ?? "",
-        address: client.contactInfo?.address ?? "",
-        preferences: client.preferences ?? "",
-        notes: client.notes ?? "",
-      });
-    }
-  }, [client]);
+  // Adjust form state when the fetched client arrives, computed during
+  // render rather than in an effect (avoids an extra render pass — see
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes).
+  const [loadedClientId, setLoadedClientId] = useState<string | undefined>(undefined);
+  if (client && client.id !== loadedClientId) {
+    setLoadedClientId(client.id);
+    setValues({
+      name: client.name,
+      email: client.contactInfo?.email ?? "",
+      phone: client.contactInfo?.phone ?? "",
+      address: client.contactInfo?.address ?? "",
+      preferences: client.preferences ?? "",
+      notes: client.notes ?? "",
+    });
+  }
 
   const handleChange = <K extends keyof ClientFormValues>(field: K, value: ClientFormValues[K]): void => {
     setValues((prev) => ({ ...prev, [field]: value }));

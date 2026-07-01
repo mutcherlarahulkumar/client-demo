@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { createArtwork, updateArtwork } from "@artsdiva/api/artwork.api";
 import { useArtwork } from "@artsdiva/hooks/useArtwork";
@@ -30,20 +30,23 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (artwork) {
-      setValues({
-        title: artwork.title,
-        artistId: artwork.artistId,
-        medium: artwork.medium,
-        dimensions: artwork.dimensions,
-        year: String(artwork.year),
-        acquisitionDate: artwork.acquisitionDate.slice(0, 10),
-        status: artwork.status,
-        notes: artwork.notes ?? "",
-      });
-    }
-  }, [artwork]);
+  // Adjust form state when the fetched artwork arrives, computed during
+  // render rather than in an effect (avoids an extra render pass — see
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes).
+  const [loadedArtworkId, setLoadedArtworkId] = useState<string | undefined>(undefined);
+  if (artwork && artwork.id !== loadedArtworkId) {
+    setLoadedArtworkId(artwork.id);
+    setValues({
+      title: artwork.title,
+      artistId: artwork.artistId,
+      medium: artwork.medium,
+      dimensions: artwork.dimensions,
+      year: String(artwork.year),
+      acquisitionDate: artwork.acquisitionDate.slice(0, 10),
+      status: artwork.status,
+      notes: artwork.notes ?? "",
+    });
+  }
 
   const handleChange = <K extends keyof ArtworkFormValues>(field: K, value: ArtworkFormValues[K]): void => {
     setValues((prev) => ({ ...prev, [field]: value }));
