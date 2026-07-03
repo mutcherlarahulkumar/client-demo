@@ -31,14 +31,21 @@ import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { useAuth } from "@artsdiva/hooks/useAuth";
 
 function initials(name: string) {
-  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 interface ArtistDetailContainerProps {
   artistId: string;
 }
 
-export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) {
+export function ArtistDetailContainer({
+  artistId,
+}: ArtistDetailContainerProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -55,7 +62,10 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
       showToast(`"${artist?.name ?? "Artist"}" deleted`);
       void router.push("/artists");
     } catch (err: unknown) {
-      showToast(err instanceof Error ? err.message : "Failed to delete artist", "error");
+      showToast(
+        err instanceof Error ? err.message : "Failed to delete artist",
+        "error",
+      );
     }
   };
 
@@ -63,7 +73,9 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
   if (error || !artist) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error instanceof Error ? error.message : "Artist not found"}</Alert>
+        <Alert severity="error">
+          {error instanceof Error ? error.message : "Artist not found"}
+        </Alert>
       </Box>
     );
   }
@@ -71,7 +83,11 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
   return (
     <Box sx={{ p: 3, maxWidth: 1100 }}>
       <Link href="/artists" style={{ textDecoration: "none" }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, "&:hover": { textDecoration: "underline" } }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 2, "&:hover": { textDecoration: "underline" } }}
+        >
           â† Back to Artists
         </Typography>
       </Link>
@@ -80,7 +96,15 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
       <Card variant="outlined" sx={{ mb: 2.5 }}>
         <CardContent sx={{ p: 2.5 }}>
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <Avatar sx={{ width: 56, height: 56, fontSize: "1.25rem", fontWeight: 700, bgcolor: "primary.main" }}>
+            <Avatar
+              sx={{
+                width: 56,
+                height: 56,
+                fontSize: "1.25rem",
+                fontWeight: 700,
+                bgcolor: "primary.main",
+              }}
+            >
               {initials(artist.name)}
             </Avatar>
 
@@ -89,7 +113,11 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
                 {artist.name}
               </Typography>
               {artist.bio && (
-                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, mb: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.6, mb: 1 }}
+                >
                   {artist.bio}
                 </Typography>
               )}
@@ -122,25 +150,60 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
       </Card>
 
       {/* Info row */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, mb: 2.5 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 2,
+          mb: 2.5,
+        }}
+      >
         <Card variant="outlined">
           <CardContent sx={{ p: 2.5 }}>
-            <Typography variant="overline" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
+            <Typography
+              variant="overline"
+              color="text.secondary"
+              sx={{ display: "block", mb: 1.5 }}
+            >
               Terms &amp; Agreement
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box>
-                <Typography variant="caption" color="text.secondary" display="block">Commission Terms</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>{artist.commissionTerms}</Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block" }}
+                >
+                  Commission Terms
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {artist.commissionTerms}
+                </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary" display="block">MOU Status</Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block" }}
+                >
+                  MOU Status
+                </Typography>
                 <StatusBadge type="mou" status={artist.mouStatus} />
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary" display="block">Artist Since</Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block" }}
+                >
+                  Artist Since
+                </Typography>
                 <Typography variant="body2">
-                  {new Date(artist.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                  {new Date(artist.createdAt).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </Typography>
               </Box>
             </Box>
@@ -149,16 +212,34 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
 
         <Card variant="outlined">
           <CardContent sx={{ p: 2.5 }}>
-            <Typography variant="overline" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
+            <Typography
+              variant="overline"
+              color="text.secondary"
+              sx={{ display: "block", mb: 1.5 }}
+            >
               Contact Info
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box>
-                <Typography variant="caption" color="text.secondary" display="block">Email</Typography>
-                <Typography variant="body2">{artist.contactInfo?.email ?? "â€”"}</Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block" }}
+                >
+                  Email
+                </Typography>
+                <Typography variant="body2">
+                  {artist.contactInfo?.email ?? "â€”"}
+                </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary" display="block">Phone</Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block" }}
+                >
+                  Phone
+                </Typography>
                 <Typography variant="body2">
                   {artist.contactInfo?.phone
                     ? `${artist.contactInfo.phoneCountryCode ?? ""} ${artist.contactInfo.phone}`.trim()
@@ -166,8 +247,16 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary" display="block">Address</Typography>
-                <Typography variant="body2">{artist.contactInfo?.address ?? "â€”"}</Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block" }}
+                >
+                  Address
+                </Typography>
+                <Typography variant="body2">
+                  {artist.contactInfo?.address ?? "â€”"}
+                </Typography>
               </Box>
             </Box>
           </CardContent>
@@ -175,7 +264,14 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
       </Box>
 
       {/* Artworks */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 1.5,
+        }}
+      >
         <Typography variant="h6">
           Artworks
           {!isLoading && (
@@ -208,13 +304,17 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">Loading artworksâ€¦</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Loading artworksâ€¦
+                  </Typography>
                 </TableCell>
               </TableRow>
             ) : artworks.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ py: 5 }}>
-                  <Typography variant="body2" color="text.secondary">No artworks yet for this artist.</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    No artworks yet for this artist.
+                  </Typography>
                 </TableCell>
               </TableRow>
             ) : (
@@ -226,16 +326,28 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
                   onClick={() => void router.push(`/artworks/${artwork.id}`)}
                 >
                   <TableCell sx={{ py: 1 }}>
-                    <ImageWithFallback src={artwork.images[0]} alt={artwork.title} width={40} height={40} borderRadius={4} />
+                    <ImageWithFallback
+                      src={artwork.images[0]}
+                      alt={artwork.title}
+                      width={40}
+                      height={40}
+                      borderRadius={4}
+                    />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{artwork.title}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {artwork.title}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary">{artwork.medium}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {artwork.medium}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary">{artwork.year}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {artwork.year}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <StatusBadge type="artwork" status={artwork.status} />
@@ -244,7 +356,10 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
                     <Tooltip title="Edit">
                       <IconButton
                         size="small"
-                        onClick={(e) => { e.stopPropagation(); void router.push(`/artworks/${artwork.id}/edit`); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void router.push(`/artworks/${artwork.id}/edit`);
+                        }}
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
@@ -269,5 +384,3 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
     </Box>
   );
 }
-
-

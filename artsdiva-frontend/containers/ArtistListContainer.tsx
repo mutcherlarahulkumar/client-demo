@@ -29,9 +29,13 @@ import type { Artist } from "@artsdiva/types/artist.types";
 import { useDebounce } from "@artsdiva/hooks/useDebounce";
 
 function initials(name: string) {
-  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
-
 
 export function ArtistListContainer() {
   const router = useRouter();
@@ -57,7 +61,8 @@ export function ArtistListContainer() {
       showToast(`"${deleteTarget.name}" deleted`);
       setDeleteTarget(null);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to delete artist";
+      const msg =
+        err instanceof Error ? err.message : "Failed to delete artist";
       showToast(msg, "error");
     }
   };
@@ -65,13 +70,26 @@ export function ArtistListContainer() {
   return (
     <Box sx={{ p: 3, maxWidth: 1200 }}>
       {/* Header */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 3,
+        }}
+      >
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: 700, color: "text.primary" }}
+          >
             Artists
           </Typography>
           {!isLoading && (
-            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", mt: 0.25 }}
+            >
               {total} {total === 1 ? "artist" : "artists"} total
             </Typography>
           )}
@@ -115,7 +133,12 @@ export function ArtistListContainer() {
       {/* Table */}
       <TableContainer
         component={Paper}
-        sx={{ borderRadius: 2, border: 1, borderColor: "divider", boxShadow: "none" }}
+        sx={{
+          borderRadius: 2,
+          border: 1,
+          borderColor: "divider",
+          boxShadow: "none",
+        }}
       >
         <Table>
           <TableHead>
@@ -134,7 +157,9 @@ export function ArtistListContainer() {
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
                   <Typography sx={{ color: "text.disabled" }}>
-                    {search ? `No artists found for "${search}"` : "No artists yet. Add one to get started."}
+                    {search
+                      ? `No artists found for "${search}"`
+                      : "No artists yet. Add one to get started."}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -148,7 +173,9 @@ export function ArtistListContainer() {
                     onClick={() => void router.push(`/artists/${artist.id}`)}
                   >
                     <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                      >
                         <Avatar
                           sx={{
                             width: 36,
@@ -161,11 +188,17 @@ export function ArtistListContainer() {
                           {initials(artist.name)}
                         </Avatar>
                         <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 600, color: "text.primary" }}
+                          >
                             {artist.name}
                           </Typography>
                           {artist.contactInfo?.email && (
-                            <Typography variant="caption" sx={{ color: "text.disabled" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.disabled" }}
+                            >
                               {artist.contactInfo.email}
                             </Typography>
                           )}
@@ -173,7 +206,10 @@ export function ArtistListContainer() {
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }}
+                      >
                         {artist.commissionTerms}
                       </Typography>
                     </TableCell>
@@ -181,18 +217,31 @@ export function ArtistListContainer() {
                       <StatusBadge type="mou" status={artist.mouStatus} />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                        {artist.contactInfo?.phoneCountryCode && artist.contactInfo?.phone
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }}
+                      >
+                        {artist.contactInfo?.phoneCountryCode &&
+                        artist.contactInfo?.phone
                           ? `${artist.contactInfo.phoneCountryCode} ${artist.contactInfo.phone}`
-                          : artist.contactInfo?.phone ?? "â€”"}
+                          : (artist.contactInfo?.phone ?? "â€”")}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          gap: 0.5,
+                        }}
+                      >
                         <Tooltip title="Edit">
                           <IconButton
                             size="small"
-                            onClick={(e) => { e.stopPropagation(); void router.push(`/artists/${artist.id}/edit`); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void router.push(`/artists/${artist.id}/edit`);
+                            }}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
@@ -201,7 +250,10 @@ export function ArtistListContainer() {
                           <IconButton
                             size="small"
                             color="error"
-                            onClick={(e) => { e.stopPropagation(); setDeleteTarget(artist); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTarget(artist);
+                            }}
                           >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
@@ -227,5 +279,4 @@ export function ArtistListContainer() {
       />
     </Box>
   );
-
-
+}

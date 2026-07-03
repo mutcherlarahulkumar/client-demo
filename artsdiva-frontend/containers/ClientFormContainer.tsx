@@ -11,7 +11,11 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Alert from "@mui/material/Alert";
 import Link from "next/link";
-import { useClient, useCreateClient, useUpdateClient } from "@artsdiva/hooks/useClients";
+import {
+  useClient,
+  useCreateClient,
+  useUpdateClient,
+} from "@artsdiva/hooks/useClients";
 import { PhoneInputField } from "@artsdiva/components/fields/PhoneInputField";
 import { FieldLabel } from "@artsdiva/components/fields/FieldInfo";
 import { SkeletonDetailCard } from "@artsdiva/components/ui/SkeletonTable";
@@ -21,10 +25,21 @@ const PHONE_CODE_RE = /^\+\d{1,4}$/;
 const PHONE_RE = /^[\d\s\-().]{6,15}$/;
 
 const validationSchema = Yup.object({
-  name: Yup.string().min(2, "At least 2 characters").max(150, "Too long").required("Name is required"),
-  email: Yup.string().transform((v) => v === "" ? undefined : v).email("Invalid email").optional(),
-  phoneCountryCode: Yup.string().matches(PHONE_CODE_RE, "Invalid dial code").optional(),
-  phone: Yup.string().transform((v) => v === "" ? undefined : v).matches(PHONE_RE, "Invalid phone number").optional(),
+  name: Yup.string()
+    .min(2, "At least 2 characters")
+    .max(150, "Too long")
+    .required("Name is required"),
+  email: Yup.string()
+    .transform((v) => (v === "" ? undefined : v))
+    .email("Invalid email")
+    .optional(),
+  phoneCountryCode: Yup.string()
+    .matches(PHONE_CODE_RE, "Invalid dial code")
+    .optional(),
+  phone: Yup.string()
+    .transform((v) => (v === "" ? undefined : v))
+    .matches(PHONE_RE, "Invalid phone number")
+    .optional(),
   address: Yup.string().max(500, "Too long").optional(),
   preferences: Yup.string().max(2000, "Too long").optional(),
   notes: Yup.string().max(2000, "Too long").optional(),
@@ -82,12 +97,19 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
   return (
     <Box sx={{ p: 3, maxWidth: 860 }}>
       <Box sx={{ mb: 3 }}>
-        <Link href={clientId ? `/clients/${clientId}` : "/clients"} style={{ textDecoration: "none" }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, cursor: "pointer" }}>
+        <Link
+          href={clientId ? `/clients/${clientId}` : "/clients"}
+          style={{ textDecoration: "none" }}
+        >
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 0.5, cursor: "pointer" }}
+          >
             {isEdit ? "← Back to Client" : "← Back to Clients"}
           </Typography>
         </Link>
-        <Typography variant="h5" fontWeight={700}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
           {isEdit ? `Edit: ${client?.name ?? ""}` : "Add New Client"}
         </Typography>
       </Box>
@@ -115,17 +137,26 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
             showToast(isEdit ? "Client updated" : "Client created");
             void router.push(`/clients/${saved.id}`);
           } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to save client";
+            const msg =
+              err instanceof Error ? err.message : "Failed to save client";
             helpers.setStatus({ error: msg });
           }
         }}
       >
-        {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isSubmitting, status }) => (
+        {({
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          setFieldValue,
+          isSubmitting,
+          status,
+        }) => (
           <Form>
             <Card variant="outlined">
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-
                   <Box>
                     <FieldLabel label="Name" required />
                     <TextField
@@ -167,9 +198,15 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
                     <PhoneInputField
                       countryCode={values.phoneCountryCode}
                       phone={values.phone}
-                      onCountryCodeChange={(val) => void setFieldValue("phoneCountryCode", val)}
+                      onCountryCodeChange={(val) =>
+                        void setFieldValue("phoneCountryCode", val)
+                      }
                       onPhoneChange={(val) => void setFieldValue("phone", val)}
-                      countryCodeError={touched.phoneCountryCode ? errors.phoneCountryCode : undefined}
+                      countryCodeError={
+                        touched.phoneCountryCode
+                          ? errors.phoneCountryCode
+                          : undefined
+                      }
                       phoneError={touched.phone ? errors.phone : undefined}
                     />
                   </Box>
@@ -230,11 +267,19 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
                     />
                   </Box>
 
-                  {status?.error && <Alert severity="error">{status.error as string}</Alert>}
+                  {status?.error && (
+                    <Alert severity="error">{status.error as string}</Alert>
+                  )}
 
                   <Divider />
 
-                  <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: 1.5,
+                    }}
+                  >
                     <Button
                       variant="outlined"
                       onClick={() => void router.back()}
@@ -242,11 +287,18 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" variant="contained" disabled={isSubmitting}>
-                      {isSubmitting ? "Saving…" : isEdit ? "Save Changes" : "Create Client"}
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting
+                        ? "Saving…"
+                        : isEdit
+                          ? "Save Changes"
+                          : "Create Client"}
                     </Button>
                   </Box>
-
                 </Box>
               </CardContent>
             </Card>
@@ -256,4 +308,3 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
     </Box>
   );
 }
-
