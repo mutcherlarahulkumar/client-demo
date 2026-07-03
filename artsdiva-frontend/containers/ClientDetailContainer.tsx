@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { motion } from "framer-motion";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -9,16 +8,16 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Alert from "@mui/material/Alert";
 import Link from "next/link";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 import { useClient, useDeleteClient } from "@artsdiva/hooks/useClients";
 import { SkeletonDetailCard } from "@artsdiva/components/ui/SkeletonTable";
 import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
 import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { useAuth } from "@artsdiva/hooks/useAuth";
 
-const AVATAR_COLORS = ["#4F46E5", "#0891B2", "#16A34A", "#DC2626", "#B45309", "#7C3AED"];
-function avatarColor(name: string) {
-  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
-}
+
 function initials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
@@ -56,16 +55,12 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-    >
+    <Box>
       <Box sx={{ p: 3, maxWidth: 1100 }}>
         {/* Breadcrumb */}
         <Link href="/clients" style={{ textDecoration: "none" }}>
-          <Typography variant="body2" sx={{ color: "#94A3B8", mb: 2, cursor: "pointer", "&:hover": { color: "#4F46E5" } }}>
-            ← Back to Clients
+          <Typography variant="body2" sx={{ color: "text.disabled", mb: 2, cursor: "pointer", "&:hover": { color: "primary.main" } }}>
+            â† Back to Clients
           </Typography>
         </Link>
 
@@ -77,7 +72,7 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
                 sx={{
                   width: 64,
                   height: 64,
-                  backgroundColor: avatarColor(client.name),
+                  bgcolor: "primary.main",
                   fontSize: "1.5rem",
                   fontWeight: 700,
                   flexShrink: 0,
@@ -86,35 +81,37 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
                 {initials(client.name)}
               </Avatar>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: "#0F172A" }}>{client.name}</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>{client.name}</Typography>
                 {client.contactInfo?.email && (
-                  <Typography variant="body2" sx={{ color: "#64748B", mt: 0.5 }}>{client.contactInfo.email}</Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>{client.contactInfo.email}</Typography>
                 )}
               </Box>
               <Box sx={{ display: "flex", gap: 1 }}>
                 <Button
                   variant="contained"
                   size="small"
+                  startIcon={<AddIcon />}
                   onClick={() => void router.push(`/artworks/new?clientId=${clientId}`)}
                 >
-                  + Add Artwork
+                  Add Artwork
                 </Button>
                 <Button
                   variant="outlined"
                   size="small"
+                  startIcon={<EditIcon />}
                   onClick={() => void router.push(`/clients/${clientId}/edit`)}
-                  sx={{ color: "#64748B", borderColor: "#E2E8F0" }}
                 >
-                  ✏️ Edit
+                  Edit
                 </Button>
                 {user?.role === "ADMIN" && (
                   <Button
                     variant="outlined"
                     size="small"
                     onClick={() => setDeleteOpen(true)}
-                    sx={{ color: "#DC2626", borderColor: "#FECACA", "&:hover": { backgroundColor: "#FEF2F2" } }}
+                    color="error"
+                    startIcon={<DeleteIcon />}
                   >
-                    🗑 Delete
+                    Delete
                   </Button>
                 )}
               </Box>
@@ -126,25 +123,25 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
         <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2.5, mb: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle2" sx={{ color: "#64748B", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ color: "text.secondary", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
                 Contact Info
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Email</Typography>
-                  <Typography variant="body2" sx={{ color: "#0F172A" }}>{client.contactInfo?.email ?? "—"}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Email</Typography>
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.contactInfo?.email ?? "â€”"}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Phone</Typography>
-                  <Typography variant="body2" sx={{ color: "#0F172A" }}>
+                  <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Phone</Typography>
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>
                     {client.contactInfo?.phoneCountryCode && client.contactInfo?.phone
                       ? `${client.contactInfo.phoneCountryCode} ${client.contactInfo.phone}`
-                      : client.contactInfo?.phone ?? "—"}
+                      : client.contactInfo?.phone ?? "â€”"}
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Address</Typography>
-                  <Typography variant="body2" sx={{ color: "#0F172A" }}>{client.contactInfo?.address ?? "—"}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Address</Typography>
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.contactInfo?.address ?? "â€”"}</Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -152,21 +149,21 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
 
           <Card>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle2" sx={{ color: "#64748B", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ color: "text.secondary", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
                 Profile
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Preferences</Typography>
-                  <Typography variant="body2" sx={{ color: "#0F172A" }}>{client.preferences ?? "—"}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Preferences</Typography>
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.preferences ?? "â€”"}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Notes</Typography>
-                  <Typography variant="body2" sx={{ color: "#475569" }}>{client.notes ?? "—"}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Notes</Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>{client.notes ?? "â€”"}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Client Since</Typography>
-                  <Typography variant="body2" sx={{ color: "#0F172A" }}>
+                  <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Client Since</Typography>
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>
                     {new Date(client.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
                   </Typography>
                 </Box>
@@ -185,6 +182,7 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
         onConfirm={() => void handleDelete()}
         onCancel={() => setDeleteOpen(false)}
       />
-    </motion.div>
+    </Box>
   );
 }
+

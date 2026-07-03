@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
@@ -31,12 +31,12 @@ export function ImageWithFallback({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          border: "1px solid #E2E8F0",
+          border: 1, borderColor: "divider",
           gap: 1,
         }}
       >
-        <Typography sx={{ fontSize: 36 }}>🖼</Typography>
-        <Typography variant="caption" sx={{ color: "#94A3B8", textAlign: "center", px: 2 }}>
+        <Typography sx={{ fontSize: 36 }}>ðŸ–¼</Typography>
+        <Typography variant="caption" sx={{ color: "text.disabled", textAlign: "center", px: 2 }}>
           No image
         </Typography>
       </Box>
@@ -59,3 +59,4 @@ export function ImageWithFallback({
     />
   );
 }
+

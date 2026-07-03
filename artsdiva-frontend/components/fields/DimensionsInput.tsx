@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
@@ -32,8 +32,8 @@ export function DimensionsInput({ value, onChange, errors, disabled }: Dimension
           slotProps={{ htmlInput: { min: 0, step: 0.1 } }}
           sx={{ flex: 1 }}
         />
-        <Box sx={{ pt: 1.2, color: "#94A3B8", flexShrink: 0 }}>
-          <Typography>×</Typography>
+        <Box sx={{ pt: 1.2, color: "text.disabled", flexShrink: 0 }}>
+          <Typography>Ã—</Typography>
         </Box>
         <TextField
           size="small"
@@ -61,10 +61,11 @@ export function DimensionsInput({ value, onChange, errors, disabled }: Dimension
         </FormControl>
       </Box>
       {value.width && value.height && (
-        <Typography variant="caption" sx={{ color: "#94A3B8", mt: 0.5, display: "block" }}>
-          {value.width} × {value.height} {value.unit ?? "cm"}
+        <Typography variant="caption" sx={{ color: "text.disabled", mt: 0.5, display: "block" }}>
+          {value.width} Ã— {value.height} {value.unit ?? "cm"}
         </Typography>
       )}
     </Box>
   );
 }
+

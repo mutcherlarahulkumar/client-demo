@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useClients } from "@artsdiva/hooks/useClients";
 import { useLeases } from "@artsdiva/hooks/useLeases";
 import { LeaseForm, type LeaseFormValues } from "@artsdiva/components/LeaseForm";
@@ -44,3 +44,4 @@ export function LeaseFormContainer({ artworkId, onLeased }: LeaseFormContainerPr
     />
   );
 }
+

@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { motion, AnimatePresence } from "framer-motion";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -17,6 +16,10 @@ import Tooltip from "@mui/material/Tooltip";
 import InputAdornment from "@mui/material/InputAdornment";
 import Avatar from "@mui/material/Avatar";
 import Alert from "@mui/material/Alert";
+import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useClients, useDeleteClient } from "@artsdiva/hooks/useClients";
 import { SkeletonTableRows } from "@artsdiva/components/ui/SkeletonTable";
 import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
@@ -24,10 +27,7 @@ import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { useDebounce } from "@artsdiva/hooks/useDebounce";
 import type { Client } from "@artsdiva/types/client.types";
 
-const AVATAR_COLORS = ["#4F46E5", "#0891B2", "#16A34A", "#DC2626", "#B45309", "#7C3AED"];
-function avatarColor(name: string) {
-  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
-}
+
 function initials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
@@ -63,15 +63,15 @@ export function ClientListContainer() {
     <Box sx={{ p: 3, maxWidth: 1200 }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: "#0F172A" }}>Clients</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>Clients</Typography>
           {!isLoading && (
-            <Typography variant="body2" sx={{ color: "#64748B", mt: 0.25 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
               {total} {total === 1 ? "client" : "clients"} total
             </Typography>
           )}
         </Box>
-        <Button variant="contained" onClick={() => void router.push("/clients/new")} sx={{ gap: 0.5 }}>
-          + Add Client
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => void router.push("/clients/new")}>
+          Add Client
         </Button>
       </Box>
 
@@ -84,7 +84,7 @@ export function ClientListContainer() {
           sx={{ width: 320 }}
           slotProps={{
             input: {
-              startAdornment: <InputAdornment position="start"><Typography sx={{ color: "#94A3B8" }}>🔍</Typography></InputAdornment>,
+              startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" color="action" /></InputAdornment>,
             },
           }}
         />
@@ -92,7 +92,7 @@ export function ClientListContainer() {
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error instanceof Error ? error.message : "Failed to load clients"}</Alert>}
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2, border: "1px solid #E2E8F0", boxShadow: "none" }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 2, border: 1, borderColor: "divider", boxShadow: "none" }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -109,71 +109,64 @@ export function ClientListContainer() {
             ) : clients.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
-                  <Typography sx={{ color: "#94A3B8" }}>
+                  <Typography sx={{ color: "text.disabled" }}>
                     {search ? `No clients found for "${search}"` : "No clients yet. Add one to get started."}
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              <AnimatePresence>
-                {clients.map((client, i) => (
-                  <motion.tr
+              <>
+                {clients.map((client) => (
+                  <TableRow
                     key={client.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ delay: i * 0.03, duration: 0.2 }}
-                    style={{ display: "table-row" }}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => void router.push(`/clients/${client.id}`)}
                   >
                     <TableCell>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                        <Avatar sx={{ width: 36, height: 36, backgroundColor: avatarColor(client.name), fontSize: "0.75rem", fontWeight: 700 }}>
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: "primary.main", fontSize: "0.75rem", fontWeight: 700 }}>
                           {initials(client.name)}
                         </Avatar>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: "#0F172A" }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
                           {client.name}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>
-                        {client.contactInfo?.email ?? "—"}
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        {client.contactInfo?.email ?? "â€”"}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
                         {client.contactInfo?.phoneCountryCode && client.contactInfo?.phone
                           ? `${client.contactInfo.phoneCountryCode} ${client.contactInfo.phone}`
-                          : client.contactInfo?.phone ?? "—"}
+                          : client.contactInfo?.phone ?? "â€”"}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }} noWrap>
-                        {client.contactInfo?.address ?? "—"}
+                      <Typography variant="body2" sx={{ color: "text.secondary" }} noWrap>
+                        {client.contactInfo?.address ?? "â€”"}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-                        <Tooltip title="View">
-                          <IconButton size="small" onClick={() => void router.push(`/clients/${client.id}`)} sx={{ color: "#64748B" }}>
-                            <Typography sx={{ fontSize: 14 }}>👁</Typography>
-                          </IconButton>
-                        </Tooltip>
                         <Tooltip title="Edit">
-                          <IconButton size="small" onClick={() => void router.push(`/clients/${client.id}/edit`)} sx={{ color: "#64748B" }}>
-                            <Typography sx={{ fontSize: 14 }}>✏️</Typography>
+                          <IconButton size="small" onClick={(e) => { e.stopPropagation(); void router.push(`/clients/${client.id}/edit`); }}>
+                            <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete">
-                          <IconButton size="small" onClick={() => setDeleteTarget(client)} sx={{ color: "#64748B", "&:hover": { color: "#DC2626" } }}>
-                            <Typography sx={{ fontSize: 14 }}>🗑</Typography>
+                          <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setDeleteTarget(client); }}>
+                            <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </Box>
                     </TableCell>
-                  </motion.tr>
+                  </TableRow>
                 ))}
-              </AnimatePresence>
+              </>
             )}
           </TableBody>
         </Table>
@@ -191,3 +184,5 @@ export function ClientListContainer() {
     </Box>
   );
 }
+
+

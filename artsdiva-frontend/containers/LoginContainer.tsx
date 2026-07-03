@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@artsdiva/hooks/useAuth";
 import { useToast } from "@artsdiva/contexts/ToastProvider";
@@ -15,7 +15,7 @@ export function LoginContainer() {
     void login({ email, password }).then((success) => {
       if (success) {
         showToast("Signed in");
-        // Only ever redirect to a relative in-app path — never trust
+        // Only ever redirect to a relative in-app path â€” never trust
         // ?next= as-is, or an absolute/protocol-relative URL could be
         // used for an open-redirect.
         const rawNext = router.query.next;
@@ -38,3 +38,4 @@ export function LoginContainer() {
     />
   );
 }
+

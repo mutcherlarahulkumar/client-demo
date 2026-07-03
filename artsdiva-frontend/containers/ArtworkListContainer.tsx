@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { motion, AnimatePresence } from "framer-motion";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -17,6 +16,10 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import InputAdornment from "@mui/material/InputAdornment";
 import Alert from "@mui/material/Alert";
+import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useArtworks, useDeleteArtwork } from "@artsdiva/hooks/useArtworks";
 import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
 import { SkeletonTableRows } from "@artsdiva/components/ui/SkeletonTable";
@@ -57,23 +60,23 @@ export function ArtworkListContainer() {
 
   const formatDimensions = (artwork: Artwork) => {
     const d = artwork.dimensions;
-    if (!d) return "—";
-    return `${d.width} × ${d.height} ${d.unit}`;
+    if (!d) return "â€”";
+    return `${d.width} Ã— ${d.height} ${d.unit}`;
   };
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200 }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: "#0F172A" }}>Artworks</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>Artworks</Typography>
           {!isLoading && (
-            <Typography variant="body2" sx={{ color: "#64748B", mt: 0.25 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
               {total} {total === 1 ? "artwork" : "artworks"} total
             </Typography>
           )}
         </Box>
-        <Button variant="contained" onClick={() => void router.push("/artworks/new")} sx={{ gap: 0.5 }}>
-          + Add Artwork
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => void router.push("/artworks/new")}>
+          Add Artwork
         </Button>
       </Box>
 
@@ -86,7 +89,7 @@ export function ArtworkListContainer() {
           sx={{ width: 300 }}
           slotProps={{
             input: {
-              startAdornment: <InputAdornment position="start"><Typography sx={{ color: "#94A3B8" }}>🔍</Typography></InputAdornment>,
+              startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" color="action" /></InputAdornment>,
             },
           }}
         />
@@ -98,15 +101,15 @@ export function ArtworkListContainer() {
           sx={{ width: 180 }}
         >
           <MenuItem value="">All Statuses</MenuItem>
-          <MenuItem value="IN_COLLECTION">🟢 In Collection</MenuItem>
-          <MenuItem value="ON_LEASE">🔵 On Lease</MenuItem>
-          <MenuItem value="SOLD">🟡 Sold</MenuItem>
+          <MenuItem value="IN_COLLECTION">ðŸŸ¢ In Collection</MenuItem>
+          <MenuItem value="ON_LEASE">ðŸ”µ On Lease</MenuItem>
+          <MenuItem value="SOLD">ðŸŸ¡ Sold</MenuItem>
         </TextField>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error instanceof Error ? error.message : "Failed to load artworks"}</Alert>}
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2, border: "1px solid #E2E8F0", boxShadow: "none" }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 2, border: 1, borderColor: "divider", boxShadow: "none" }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -126,21 +129,19 @@ export function ArtworkListContainer() {
             ) : artworks.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
-                  <Typography sx={{ color: "#94A3B8" }}>
+                  <Typography sx={{ color: "text.disabled" }}>
                     {search || status ? "No artworks match your filters." : "No artworks yet. Add one to get started."}
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              <AnimatePresence>
-                {artworks.map((artwork, i) => (
-                  <motion.tr
+              <>
+                {artworks.map((artwork) => (
+                  <TableRow
                     key={artwork.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ delay: i * 0.03, duration: 0.2 }}
-                    style={{ display: "table-row" }}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => void router.push(`/artworks/${artwork.id}`)}
                   >
                     <TableCell>
                       <ImageWithFallback
@@ -152,49 +153,44 @@ export function ArtworkListContainer() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: "#0F172A" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
                         {artwork.title}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>
-                        {artwork.artist?.name ?? "—"}
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        {artwork.artist?.name ?? "â€”"}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>{artwork.medium}</Typography>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>{artwork.medium}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>{artwork.year}</Typography>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>{artwork.year}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>{formatDimensions(artwork)}</Typography>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>{formatDimensions(artwork)}</Typography>
                     </TableCell>
                     <TableCell>
                       <StatusBadge type="artwork" status={artwork.status} />
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-                        <Tooltip title="View">
-                          <IconButton size="small" onClick={() => void router.push(`/artworks/${artwork.id}`)} sx={{ color: "#64748B" }}>
-                            <Typography sx={{ fontSize: 14 }}>👁</Typography>
-                          </IconButton>
-                        </Tooltip>
                         <Tooltip title="Edit">
-                          <IconButton size="small" onClick={() => void router.push(`/artworks/${artwork.id}/edit`)} sx={{ color: "#64748B" }}>
-                            <Typography sx={{ fontSize: 14 }}>✏️</Typography>
+                          <IconButton size="small" onClick={(e) => { e.stopPropagation(); void router.push(`/artworks/${artwork.id}/edit`); }}>
+                            <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete">
-                          <IconButton size="small" onClick={() => setDeleteTarget(artwork)} sx={{ color: "#64748B", "&:hover": { color: "#DC2626" } }}>
-                            <Typography sx={{ fontSize: 14 }}>🗑</Typography>
+                          <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setDeleteTarget(artwork); }}>
+                            <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </Box>
                     </TableCell>
-                  </motion.tr>
+                  </TableRow>
                 ))}
-              </AnimatePresence>
+              </>
             )}
           </TableBody>
         </Table>
@@ -212,3 +208,6 @@ export function ArtworkListContainer() {
     </Box>
   );
 }
+
+
+

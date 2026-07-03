@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { motion, AnimatePresence } from "framer-motion";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -17,6 +16,10 @@ import Tooltip from "@mui/material/Tooltip";
 import InputAdornment from "@mui/material/InputAdornment";
 import Avatar from "@mui/material/Avatar";
 import Alert from "@mui/material/Alert";
+import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useArtists, useDeleteArtist } from "@artsdiva/hooks/useArtists";
 import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
 import { SkeletonTableRows } from "@artsdiva/components/ui/SkeletonTable";
@@ -29,11 +32,6 @@ function initials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
-const AVATAR_COLORS = ["#4F46E5", "#0891B2", "#16A34A", "#DC2626", "#B45309", "#7C3AED"];
-function avatarColor(name: string) {
-  const idx = name.charCodeAt(0) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[idx];
-}
 
 export function ArtistListContainer() {
   const router = useRouter();
@@ -69,21 +67,21 @@ export function ArtistListContainer() {
       {/* Header */}
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: "#0F172A" }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>
             Artists
           </Typography>
           {!isLoading && (
-            <Typography variant="body2" sx={{ color: "#64748B", mt: 0.25 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
               {total} {total === 1 ? "artist" : "artists"} total
             </Typography>
           )}
         </Box>
         <Button
           variant="contained"
+          startIcon={<AddIcon />}
           onClick={() => void router.push("/artists/new")}
-          sx={{ gap: 0.5 }}
         >
-          + Add Artist
+          Add Artist
         </Button>
       </Box>
 
@@ -99,7 +97,7 @@ export function ArtistListContainer() {
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <Typography sx={{ color: "#94A3B8" }}>🔍</Typography>
+                  <SearchIcon fontSize="small" color="action" />
                 </InputAdornment>
               ),
             },
@@ -117,7 +115,7 @@ export function ArtistListContainer() {
       {/* Table */}
       <TableContainer
         component={Paper}
-        sx={{ borderRadius: 2, border: "1px solid #E2E8F0", boxShadow: "none" }}
+        sx={{ borderRadius: 2, border: 1, borderColor: "divider", boxShadow: "none" }}
       >
         <Table>
           <TableHead>
@@ -135,21 +133,19 @@ export function ArtistListContainer() {
             ) : artists.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
-                  <Typography sx={{ color: "#94A3B8" }}>
+                  <Typography sx={{ color: "text.disabled" }}>
                     {search ? `No artists found for "${search}"` : "No artists yet. Add one to get started."}
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              <AnimatePresence>
-                {artists.map((artist, i) => (
-                  <motion.tr
+              <>
+                {artists.map((artist) => (
+                  <TableRow
                     key={artist.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ delay: i * 0.03, duration: 0.2 }}
-                    style={{ display: "table-row" }}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => void router.push(`/artists/${artist.id}`)}
                   >
                     <TableCell>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -157,7 +153,7 @@ export function ArtistListContainer() {
                           sx={{
                             width: 36,
                             height: 36,
-                            backgroundColor: avatarColor(artist.name),
+                            bgcolor: "primary.main",
                             fontSize: "0.75rem",
                             fontWeight: 700,
                           }}
@@ -165,11 +161,11 @@ export function ArtistListContainer() {
                           {initials(artist.name)}
                         </Avatar>
                         <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: "#0F172A" }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
                             {artist.name}
                           </Typography>
                           {artist.contactInfo?.email && (
-                            <Typography variant="caption" sx={{ color: "#94A3B8" }}>
+                            <Typography variant="caption" sx={{ color: "text.disabled" }}>
                               {artist.contactInfo.email}
                             </Typography>
                           )}
@@ -177,7 +173,7 @@ export function ArtistListContainer() {
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
                         {artist.commissionTerms}
                       </Typography>
                     </TableCell>
@@ -185,46 +181,36 @@ export function ArtistListContainer() {
                       <StatusBadge type="mou" status={artist.mouStatus} />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
                         {artist.contactInfo?.phoneCountryCode && artist.contactInfo?.phone
                           ? `${artist.contactInfo.phoneCountryCode} ${artist.contactInfo.phone}`
-                          : artist.contactInfo?.phone ?? "—"}
+                          : artist.contactInfo?.phone ?? "â€”"}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-                        <Tooltip title="View">
-                          <IconButton
-                            size="small"
-                            onClick={() => void router.push(`/artists/${artist.id}`)}
-                            sx={{ color: "#64748B" }}
-                          >
-                            <Typography sx={{ fontSize: 14 }}>👁</Typography>
-                          </IconButton>
-                        </Tooltip>
                         <Tooltip title="Edit">
                           <IconButton
                             size="small"
-                            onClick={() => void router.push(`/artists/${artist.id}/edit`)}
-                            sx={{ color: "#64748B" }}
+                            onClick={(e) => { e.stopPropagation(); void router.push(`/artists/${artist.id}/edit`); }}
                           >
-                            <Typography sx={{ fontSize: 14 }}>✏️</Typography>
+                            <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete">
                           <IconButton
                             size="small"
-                            onClick={() => setDeleteTarget(artist)}
-                            sx={{ color: "#64748B", "&:hover": { color: "#DC2626" } }}
+                            color="error"
+                            onClick={(e) => { e.stopPropagation(); setDeleteTarget(artist); }}
                           >
-                            <Typography sx={{ fontSize: 14 }}>🗑</Typography>
+                            <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </Box>
                     </TableCell>
-                  </motion.tr>
+                  </TableRow>
                 ))}
-              </AnimatePresence>
+              </>
             )}
           </TableBody>
         </Table>
@@ -241,4 +227,5 @@ export function ArtistListContainer() {
       />
     </Box>
   );
-}
+
+

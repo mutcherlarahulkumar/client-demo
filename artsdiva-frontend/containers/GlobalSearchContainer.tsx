@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+﻿import { useRouter } from "next/router";
 import { useSearch } from "@artsdiva/hooks/useSearch";
 import { SearchBar } from "@artsdiva/components/SearchBar";
 import { SearchResultsDropdown } from "@artsdiva/components/SearchResultsDropdown";
@@ -26,3 +26,4 @@ export function GlobalSearchContainer() {
     </div>
   );
 }
+

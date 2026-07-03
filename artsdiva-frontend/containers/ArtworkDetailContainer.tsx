@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { motion } from "framer-motion";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -12,6 +11,8 @@ import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import Chip from "@mui/material/Chip";
 import Link from "next/link";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useArtwork, useDeleteArtwork, useUpdateArtworkStatus, useUploadArtworkImages } from "@artsdiva/hooks/useArtworks";
 import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
 import { SkeletonDetailCard } from "@artsdiva/components/ui/SkeletonTable";
@@ -78,33 +79,29 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
   }
 
   const dims = artwork.dimensions
-    ? `${artwork.dimensions.width} × ${artwork.dimensions.height} ${artwork.dimensions.unit}`
-    : "—";
+    ? `${artwork.dimensions.width} Ã— ${artwork.dimensions.height} ${artwork.dimensions.unit}`
+    : "â€”";
 
   const images = artwork.images ?? [];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-    >
+    <Box>
       <Box sx={{ p: 3, maxWidth: 1100 }}>
         {/* Breadcrumb */}
         <Link href="/artworks" style={{ textDecoration: "none" }}>
-          <Typography variant="body2" sx={{ color: "#94A3B8", mb: 2, cursor: "pointer", "&:hover": { color: "#4F46E5" } }}>
-            ← Back to Artworks
+          <Typography variant="body2" sx={{ color: "text.disabled", mb: 2, cursor: "pointer", "&:hover": { color: "primary.main" } }}>
+            â† Back to Artworks
           </Typography>
         </Link>
 
         {/* Header */}
         <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: 3 }}>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: "#0F172A" }}>{artwork.title}</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>{artwork.title}</Typography>
             {artwork.artist && (
               <Typography
                 variant="body2"
-                sx={{ color: "#4F46E5", mt: 0.5, cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+                sx={{ color: "primary.main", mt: 0.5, cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
                 onClick={() => void router.push(`/artists/${artwork.artist!.id}`)}
               >
                 by {artwork.artist.name}
@@ -116,18 +113,19 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
               variant="outlined"
               size="small"
               onClick={() => void router.push(`/artworks/${artworkId}/edit`)}
-              sx={{ color: "#64748B", borderColor: "#E2E8F0" }}
+              startIcon={<EditIcon />}
             >
-              ✏️ Edit
+              Edit
             </Button>
             {user?.role === "ADMIN" && (
               <Button
                 variant="outlined"
                 size="small"
                 onClick={() => setDeleteOpen(true)}
-                sx={{ color: "#DC2626", borderColor: "#FECACA", "&:hover": { backgroundColor: "#FEF2F2" } }}
+                color="error"
+                startIcon={<DeleteIcon />}
               >
-                🗑 Delete
+                Delete
               </Button>
             )}
           </Box>
@@ -157,7 +155,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
                         height: 52,
                         borderRadius: 1,
                         overflow: "hidden",
-                        border: i === selectedImage ? "2px solid #4F46E5" : "2px solid transparent",
+                        border: i === selectedImage ? "2px solid" : "2px solid transparent", borderColor: i === selectedImage ? "primary.main" : "transparent",
                         cursor: "pointer",
                         opacity: i === selectedImage ? 1 : 0.65,
                         transition: "all 0.15s",
@@ -170,7 +168,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
               )}
               <Divider sx={{ my: 1.5 }} />
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography variant="caption" sx={{ color: "#94A3B8" }}>
+                <Typography variant="caption" sx={{ color: "text.disabled" }}>
                   {images.length} {images.length === 1 ? "image" : "images"}
                 </Typography>
                 <Button
@@ -180,7 +178,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
                   sx={{ ml: "auto", fontSize: "0.75rem" }}
                   disabled={uploadMutation.isPending}
                 >
-                  {uploadMutation.isPending ? "Uploading…" : "+ Upload"}
+                  {uploadMutation.isPending ? "Uploadingâ€¦" : "+ Upload"}
                   <input type="file" accept="image/*" multiple hidden onChange={(e) => void handleImageUpload(e)} />
                 </Button>
               </Box>
@@ -191,7 +189,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Card>
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="subtitle2" sx={{ color: "#64748B", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ color: "text.secondary", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
                   Artwork Details
                 </Typography>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -202,14 +200,14 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
                     { label: "Acquired", value: new Date(artwork.acquisitionDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) },
                   ].map(({ label, value }) => (
                     <Box key={label}>
-                      <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>{label}</Typography>
-                      <Typography variant="body2" sx={{ color: "#0F172A", fontWeight: 500 }}>{value}</Typography>
+                      <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>{label}</Typography>
+                      <Typography variant="body2" sx={{ color: "text.primary", fontWeight: 500 }}>{value}</Typography>
                     </Box>
                   ))}
                   {artwork.notes && (
                     <Box>
-                      <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Notes</Typography>
-                      <Typography variant="body2" sx={{ color: "#475569" }}>{artwork.notes}</Typography>
+                      <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Notes</Typography>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>{artwork.notes}</Typography>
                     </Box>
                   )}
                 </Box>
@@ -218,7 +216,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
 
             <Card>
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="subtitle2" sx={{ color: "#64748B", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ color: "text.secondary", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
                   Status
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
@@ -233,9 +231,9 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
                   disabled={statusMutation.isPending}
                   sx={{ mt: 1 }}
                 >
-                  <MenuItem value="IN_COLLECTION">🟢 In Collection</MenuItem>
-                  <MenuItem value="ON_LEASE">🔵 On Lease</MenuItem>
-                  <MenuItem value="SOLD">🟡 Sold</MenuItem>
+                  <MenuItem value="IN_COLLECTION">ðŸŸ¢ In Collection</MenuItem>
+                  <MenuItem value="ON_LEASE">ðŸ”µ On Lease</MenuItem>
+                  <MenuItem value="SOLD">ðŸŸ¡ Sold</MenuItem>
                 </TextField>
               </CardContent>
             </Card>
@@ -252,6 +250,9 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
         onConfirm={() => void handleDelete()}
         onCancel={() => setDeleteOpen(false)}
       />
-    </motion.div>
+    </Box>
   );
 }
+
+
+

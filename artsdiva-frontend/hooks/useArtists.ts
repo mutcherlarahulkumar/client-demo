@@ -23,7 +23,11 @@ export function useCreateArtist() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateArtistDTO) => createArtist(data),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: [ARTISTS_KEY] }); },
+    onSuccess: (artist) => {
+      // Seed the detail cache immediately so the detail page renders on arrival
+      qc.setQueryData([ARTISTS_KEY, "detail", artist.id], artist);
+      void qc.invalidateQueries({ queryKey: [ARTISTS_KEY, "list"] });
+    },
   });
 }
 
@@ -31,7 +35,10 @@ export function useUpdateArtist(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: UpdateArtistDTO) => updateArtist(id, data),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: [ARTISTS_KEY] }); },
+    onSuccess: (artist) => {
+      qc.setQueryData([ARTISTS_KEY, "detail", id], artist);
+      void qc.invalidateQueries({ queryKey: [ARTISTS_KEY, "list"] });
+    },
   });
 }
 

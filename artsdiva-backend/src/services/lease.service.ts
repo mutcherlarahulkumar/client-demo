@@ -1,4 +1,4 @@
-import type { Lease, Prisma } from "@prisma/client";
+﻿import type { Lease, Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import type { CreateLeaseInput, ListLeasesQuery } from "../validators/lease.validator";
 import type { LeaseWithRelations } from "../types/lease.types";
@@ -45,12 +45,12 @@ export async function getLeaseById(id: string): Promise<LeaseWithRelations> {
 }
 
 export async function createLease(input: CreateLeaseInput): Promise<Lease> {
-  const artwork = await prisma.artwork.findUnique({ where: { id: input.artworkId } });
+  const artwork = await prisma.artwork.findUnique({ where: { id: input.artworkId, deletedAt: null } });
   if (!artwork) {
     throw new ArtworkNotFoundForLeaseError("Artwork not found");
   }
 
-  const client = await prisma.client.findUnique({ where: { id: input.clientId } });
+  const client = await prisma.client.findUnique({ where: { id: input.clientId, deletedAt: null } });
   if (!client) {
     throw new ClientNotFoundForLeaseError("Client not found");
   }
@@ -122,7 +122,7 @@ export async function cancelLease(id: string): Promise<Lease> {
       data: { status: "CANCELLED" },
     });
 
-    // Only revert the artwork if this lease was actually the active one —
+    // Only revert the artwork if this lease was actually the active one â€”
     // cancelling an already-completed/cancelled lease shouldn't touch it.
     if (lease.status === "ACTIVE") {
       await tx.artwork.update({
@@ -134,3 +134,4 @@ export async function cancelLease(id: string): Promise<Lease> {
     return updatedLease;
   });
 }
+

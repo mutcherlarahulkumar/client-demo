@@ -1,3 +1,15 @@
+import React, { useState } from "react";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import type { FieldErrors } from "@artsdiva/api/http";
 
 interface LoginFormProps {
@@ -11,7 +23,6 @@ interface LoginFormProps {
   onSubmit: () => void;
 }
 
-// Pure presentational component: props in, JSX out. No data-fetching here.
 export function LoginForm({
   email,
   password,
@@ -22,53 +33,91 @@ export function LoginForm({
   onPasswordChange,
   onSubmit,
 }: LoginFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-4 px-4">
-      <h1 className="text-lg font-medium">ArtsDiva</h1>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f5f5f5",
+        px: 2,
+      }}
+    >
+      <Card sx={{ width: "100%", maxWidth: 400, boxShadow: 3 }}>
+        <CardContent sx={{ p: 4 }}>
+          <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 3 }}>
+            ArtsDiva IMS
+          </Typography>
 
-      <form
-        className="flex flex-col gap-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSubmit();
-        }}
-      >
-        <label htmlFor="email" className="flex flex-col gap-1 text-sm">
-          Email
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
-            className="border px-2 py-1"
-          />
-          {fieldErrors?.email && <span className="text-xs text-red-700">{fieldErrors.email[0]}</span>}
-        </label>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSubmit();
+            }}
+          >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <TextField
+                label="Email *"
+                type="email"
+                fullWidth
+                value={email}
+                onChange={(e) => onEmailChange(e.target.value)}
+                error={!!fieldErrors?.email}
+                helperText={fieldErrors?.email?.[0]}
+                autoComplete="email"
+                autoFocus
+              />
 
-        <label htmlFor="password" className="flex flex-col gap-1 text-sm">
-          Password
-          <input
-            id="password"
-            type="password"
-            required
-            value={password}
-            onChange={(e) => onPasswordChange(e.target.value)}
-            className="border px-2 py-1"
-          />
-          {fieldErrors?.password && <span className="text-xs text-red-700">{fieldErrors.password[0]}</span>}
-        </label>
+              <TextField
+                label="Password *"
+                type={showPassword ? "text" : "password"}
+                fullWidth
+                value={password}
+                onChange={(e) => onPasswordChange(e.target.value)}
+                error={!!fieldErrors?.password}
+                helperText={fieldErrors?.password?.[0]}
+                autoComplete="current-password"
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword((v) => !v)}
+                          edge="end"
+                          size="small"
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
 
-        {error && (
-          <p role="alert" className="text-sm text-red-700">
-            {error}
-          </p>
-        )}
+              {error && (
+                <Alert severity="error" sx={{ py: 0.5 }}>
+                  {error}
+                </Alert>
+              )}
 
-        <button type="submit" disabled={isLoading} className="border px-2 py-1 text-sm">
-          {isLoading ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
-    </main>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                size="large"
+                disabled={isLoading}
+                sx={{ mt: 1, fontWeight: 700, letterSpacing: "0.05em" }}
+              >
+                {isLoading ? "Signing in…" : "SIGN IN"}
+              </Button>
+            </Box>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

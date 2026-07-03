@@ -5,8 +5,8 @@ import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import { getArtists } from "@artsdiva/api/artist.api";
+import MenuItem from "@mui/material/MenuItem";
+import { getArtists, getArtistById } from "@artsdiva/api/artist.api";
 import type { Artist } from "@artsdiva/types/artist.types";
 
 interface ArtistAutocompleteProps {
@@ -16,6 +16,15 @@ interface ArtistAutocompleteProps {
   disabled?: boolean;
   redirectOnCreate?: string;
 }
+
+const CREATE_OPTION: Artist = {
+  id: "__create__",
+  name: "__create__",
+  commissionTerms: "",
+  mouStatus: "PENDING",
+  createdAt: "",
+  updatedAt: "",
+};
 
 export function ArtistAutocomplete({
   value,
@@ -28,71 +37,70 @@ export function ArtistAutocomplete({
 
   const { data, isLoading } = useQuery({
     queryKey: ["artists-autocomplete", inputValue],
-    queryFn: () => getArtists({ search: inputValue, limit: 20 }),
+    queryFn: () => getArtists({ search: inputValue, limit: 30 }),
     staleTime: 10_000,
   });
 
+  // When a value (ID) is pre-filled but not in the search results, fetch by ID
+  const { data: prefilledArtist } = useQuery({
+    queryKey: ["artist-prefill", value],
+    queryFn: () => getArtistById(value),
+    enabled: !!value && value !== "__create__",
+    staleTime: 60_000,
+  });
+
   const artists = data?.data ?? [];
-  const selectedArtist = artists.find((a) => a.id === value) ?? null;
+
+  // Merge the prefilled artist into options if not already present
+  const allOptions: Artist[] = prefilledArtist && !artists.find((a) => a.id === prefilledArtist.id)
+    ? [prefilledArtist, ...artists]
+    : artists;
+
+  const selectedArtist = allOptions.find((a) => a.id === value) ?? null;
 
   const handleCreateNew = () => {
     const params = new URLSearchParams();
-    if (redirectOnCreate) {
-      params.set("redirectTo", redirectOnCreate);
-    }
+    if (redirectOnCreate) params.set("redirectTo", redirectOnCreate);
     window.location.href = `/artists/new?${params.toString()}`;
   };
 
   return (
     <Autocomplete
-      options={artists}
-      getOptionLabel={(opt: Artist) => opt.name}
+      options={[...allOptions, CREATE_OPTION]}
+      getOptionLabel={(opt: Artist) => opt.id === "__create__" ? "" : opt.name}
       value={selectedArtist}
       inputValue={inputValue}
-      onInputChange={(_, val) => setInputValue(val)}
-      onChange={(_, opt) => onChange(opt?.id ?? "")}
+      onInputChange={(_, val, reason) => {
+        if (reason !== "reset") setInputValue(val);
+      }}
+      onChange={(_, opt) => {
+        if (!opt) { onChange(""); return; }
+        if (opt.id === "__create__") { handleCreateNew(); return; }
+        onChange(opt.id);
+      }}
       disabled={disabled}
       loading={isLoading}
-      filterOptions={(x) => x}
+      filterOptions={(opts) => opts} // server-side filtering
       isOptionEqualToValue={(opt, val) => opt.id === val.id}
-      noOptionsText={
-        <Box>
-          <Typography variant="body2" sx={{ color: "#94A3B8", mb: 1 }}>
-            No artists found for &ldquo;{inputValue}&rdquo;
-          </Typography>
-          <Divider sx={{ mb: 1 }} />
-          <Box
-            onClick={handleCreateNew}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              cursor: "pointer",
-              color: "#4F46E5",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              "&:hover": { textDecoration: "underline" },
-            }}
-          >
-            <Typography>+</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: "#4F46E5" }}>
-              Create new artist &ldquo;{inputValue}&rdquo;
-            </Typography>
+      renderOption={(props, option) => {
+        if (option.id === "__create__") {
+          return (
+            <Box component="li" {...props} key="__create__"
+              sx={{ borderTop: "1px solid", borderColor: "divider", color: "primary.main", fontWeight: 600, py: 1 }}
+            >
+              + Create new artist {inputValue ? `"${inputValue}"` : ""}
+            </Box>
+          );
+        }
+        return (
+          <Box component="li" {...props} key={option.id}>
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>{option.name}</Typography>
+              <Typography variant="caption" color="text.secondary">{option.commissionTerms}</Typography>
+            </Box>
           </Box>
-        </Box>
-      }
-      renderOption={(props, option) => (
-        <li {...props} key={option.id}>
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {option.name}
-            </Typography>
-            <Typography variant="caption" sx={{ color: "#94A3B8" }}>
-              {option.commissionTerms}
-            </Typography>
-          </Box>
-        </li>
-      )}
+        );
+      }}
       renderInput={(params) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const p = params as any;

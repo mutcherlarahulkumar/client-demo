@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -62,7 +62,7 @@ export function ConfirmDialog({
                   fontSize: 16,
                 }}
               >
-                🗑
+                ðŸ—‘
               </Box>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {title}
@@ -70,12 +70,12 @@ export function ConfirmDialog({
             </Box>
           </DialogTitle>
           <DialogContent>
-            <DialogContentText sx={{ color: "#64748B", fontSize: "0.875rem" }}>
+            <DialogContentText sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
               {description}
             </DialogContentText>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-            <Button variant="outlined" onClick={onCancel} disabled={loading} sx={{ color: "#64748B", borderColor: "#E2E8F0" }}>
+            <Button variant="outlined" onClick={onCancel} disabled={loading} sx={{ color: "text.secondary", borderColor: "divider" }}>
               Cancel
             </Button>
             <Button
@@ -84,7 +84,7 @@ export function ConfirmDialog({
               disabled={loading}
               sx={{ backgroundColor: "#DC2626", "&:hover": { backgroundColor: "#B91C1C" } }}
             >
-              {loading ? "Deleting…" : confirmLabel}
+              {loading ? "Deletingâ€¦" : confirmLabel}
             </Button>
           </DialogActions>
         </Dialog>
@@ -92,3 +92,4 @@ export function ConfirmDialog({
     </AnimatePresence>
   );
 }
+
