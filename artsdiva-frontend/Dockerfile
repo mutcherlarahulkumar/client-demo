@@ -18,15 +18,21 @@ RUN pnpm build
 
 # ---- runtime stage -------------------------------------------------------
 FROM node:20-alpine AS runner
+RUN corepack enable
 WORKDIR /app
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
-# Next.js "standalone" output bundles a minimal server + only the needed deps.
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
+# Not using Next's "standalone" output here — that mode is meant for a
+# self-hosted runtime, but this app is deployed to Vercel in production
+# (which does its own build/serve and doesn't want "standalone" set).
+# This Dockerfile is only for local `docker compose up`.
+COPY --from=build /app/package.json /app/pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
+COPY --from=build /app/next.config.ts ./
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["pnpm", "start"]
