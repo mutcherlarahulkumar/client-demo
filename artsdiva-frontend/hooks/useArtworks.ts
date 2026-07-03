@@ -1,90 +1,63 @@
-import { useCallback, useEffect, useState } from "react";
-import { deleteArtwork as deleteArtworkRequest, getArtworks } from "@artsdiva/api/artwork.api";
-import { ApiError } from "@artsdiva/api/http";
-import type { Artwork, ArtworkStatus } from "@artsdiva/types/artwork.types";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getArtworks, getArtworkById, createArtwork, updateArtwork,
+  updateArtworkStatus, deleteArtwork, uploadArtworkImages,
+} from "@artsdiva/api/artwork.api";
+import type { ArtworkStatus, CreateArtworkDTO, ListArtworksParams, UpdateArtworkDTO } from "@artsdiva/types/artwork.types";
 
-interface UseArtworksResult {
-  artworks: Artwork[];
-  total: number;
-  page: number;
-  limit: number;
-  search: string;
-  status: ArtworkStatus | "";
-  artistId: string;
-  isLoading: boolean;
-  error: string | null;
-  setSearch: (value: string) => void;
-  setStatus: (value: ArtworkStatus | "") => void;
-  setArtistId: (value: string) => void;
-  setPage: (value: number) => void;
-  refetch: () => Promise<void>;
-  deleteArtwork: (id: string) => Promise<boolean>;
+export const ARTWORKS_KEY = "artworks";
+
+export function useArtworks(params: ListArtworksParams = {}) {
+  return useQuery({
+    queryKey: [ARTWORKS_KEY, "list", params],
+    queryFn: () => getArtworks(params),
+  });
 }
 
-export function useArtworks(): UseArtworksResult {
-  const [artworks, setArtworks] = useState<Artwork[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(20);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<ArtworkStatus | "">("");
-  const [artistId, setArtistId] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useArtwork(id?: string) {
+  return useQuery({
+    queryKey: [ARTWORKS_KEY, "detail", id],
+    queryFn: () => getArtworkById(id!),
+    enabled: !!id,
+  });
+}
 
-  const fetchArtworks = useCallback(async (): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await getArtworks({
-        search: search || undefined,
-        status: status || undefined,
-        artistId: artistId || undefined,
-        page,
-        limit,
-      });
-      setArtworks(result.data);
-      setTotal(result.total);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to load artworks");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [search, status, artistId, page, limit]);
+export function useCreateArtwork() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateArtworkDTO) => createArtwork(data),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: [ARTWORKS_KEY] }); },
+  });
+}
 
-  useEffect(() => {
-    void fetchArtworks();
-  }, [fetchArtworks]);
+export function useUpdateArtwork(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdateArtworkDTO) => updateArtwork(id, data),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: [ARTWORKS_KEY] }); },
+  });
+}
 
-  const deleteArtwork = useCallback(
-    async (id: string): Promise<boolean> => {
-      try {
-        await deleteArtworkRequest(id);
-        await fetchArtworks();
-        return true;
-      } catch (err) {
-        setError(err instanceof ApiError ? err.message : "Failed to delete artwork");
-        return false;
-      }
-    },
-    [fetchArtworks]
-  );
+export function useUpdateArtworkStatus(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (status: ArtworkStatus) => updateArtworkStatus(id, status),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: [ARTWORKS_KEY] }); },
+  });
+}
 
-  return {
-    artworks,
-    total,
-    page,
-    limit,
-    search,
-    status,
-    artistId,
-    isLoading,
-    error,
-    setSearch,
-    setStatus,
-    setArtistId,
-    setPage,
-    refetch: fetchArtworks,
-    deleteArtwork,
-  };
+export function useDeleteArtwork() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteArtwork(id),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: [ARTWORKS_KEY] }); },
+  });
+}
+
+export function useUploadArtworkImages(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (files: File[]) => uploadArtworkImages(id, files),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: [ARTWORKS_KEY, "detail", id] }); },
+  });
 }

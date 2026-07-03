@@ -1,121 +1,190 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { useAuth } from "@artsdiva/hooks/useAuth";
-import { useClient } from "@artsdiva/hooks/useClient";
-import { useDocuments } from "@artsdiva/hooks/useDocuments";
+import { motion } from "framer-motion";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Avatar from "@mui/material/Avatar";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Alert from "@mui/material/Alert";
+import Link from "next/link";
+import { useClient, useDeleteClient } from "@artsdiva/hooks/useClients";
+import { SkeletonDetailCard } from "@artsdiva/components/ui/SkeletonTable";
+import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
 import { useToast } from "@artsdiva/contexts/ToastProvider";
-import { LeaseHistoryTable } from "@artsdiva/components/LeaseHistoryTable";
-import { DocumentLogSection } from "@artsdiva/components/DocumentLogSection";
-import { ConfirmDialog } from "@artsdiva/components/ConfirmDialog";
-import type { DocumentFileType } from "@artsdiva/types/document.types";
+import { useAuth } from "@artsdiva/hooks/useAuth";
+
+const AVATAR_COLORS = ["#4F46E5", "#0891B2", "#16A34A", "#DC2626", "#B45309", "#7C3AED"];
+function avatarColor(name: string) {
+  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+}
+function initials(name: string) {
+  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+}
 
 interface ClientDetailContainerProps {
   clientId: string;
 }
 
-// Lease actions (create/complete/cancel) live on the Artwork detail page —
-// this view is read-only lease history, per the Lease module design.
 export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const { client, isLoading, error, deleteClient } = useClient(clientId);
-  const documents = useDocuments("CLIENT", clientId);
-  const [fileType, setFileType] = useState<DocumentFileType>("MOU");
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const handleDelete = (): void => {
-    setIsConfirmOpen(false);
-    void deleteClient().then((success) => {
-      if (success) {
-        showToast("Client deleted");
-        void router.push("/clients");
-      } else {
-        showToast("Failed to delete client", "error");
-      }
-    });
+  const { data: client, isLoading, error } = useClient(clientId);
+  const deleteMutation = useDeleteClient();
+
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(clientId);
+      showToast(`"${client?.name ?? "Client"}" deleted`);
+      void router.push("/clients");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Failed to delete client", "error");
+    }
   };
 
-  if (isLoading) return <p className="text-sm">Loading...</p>;
-  if (error || !client)
+  if (isLoading) return <SkeletonDetailCard />;
+  if (error || !client) {
     return (
-      <p role="alert" className="text-sm">
-        {error ?? "Client not found"}
-      </p>
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error instanceof Error ? error.message : "Client not found"}</Alert>
+      </Box>
     );
+  }
 
   return (
-    <div>
-      <h1 className="text-lg font-medium">{client.name}</h1>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Box sx={{ p: 3, maxWidth: 1100 }}>
+        {/* Breadcrumb */}
+        <Link href="/clients" style={{ textDecoration: "none" }}>
+          <Typography variant="body2" sx={{ color: "#94A3B8", mb: 2, cursor: "pointer", "&:hover": { color: "#4F46E5" } }}>
+            ← Back to Clients
+          </Typography>
+        </Link>
 
-      <dl className="mt-4 grid grid-cols-2 gap-y-1 text-sm">
-        {client.contactInfo?.email && (
-          <>
-            <dt>Email</dt>
-            <dd>{client.contactInfo.email}</dd>
-          </>
-        )}
-        {client.contactInfo?.phone && (
-          <>
-            <dt>Phone</dt>
-            <dd>{client.contactInfo.phone}</dd>
-          </>
-        )}
-        {client.contactInfo?.address && (
-          <>
-            <dt>Address</dt>
-            <dd>{client.contactInfo.address}</dd>
-          </>
-        )}
-        {client.preferences && (
-          <>
-            <dt>Preferences</dt>
-            <dd>{client.preferences}</dd>
-          </>
-        )}
-        {client.notes && (
-          <>
-            <dt>Notes</dt>
-            <dd>{client.notes}</dd>
-          </>
-        )}
-      </dl>
+        {/* Header card */}
+        <Card sx={{ mb: 3 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
+              <Avatar
+                sx={{
+                  width: 64,
+                  height: 64,
+                  backgroundColor: avatarColor(client.name),
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {initials(client.name)}
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: "#0F172A" }}>{client.name}</Typography>
+                {client.contactInfo?.email && (
+                  <Typography variant="body2" sx={{ color: "#64748B", mt: 0.5 }}>{client.contactInfo.email}</Typography>
+                )}
+              </Box>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => void router.push(`/artworks/new?clientId=${clientId}`)}
+                >
+                  + Add Artwork
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => void router.push(`/clients/${clientId}/edit`)}
+                  sx={{ color: "#64748B", borderColor: "#E2E8F0" }}
+                >
+                  ✏️ Edit
+                </Button>
+                {user?.role === "ADMIN" && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => setDeleteOpen(true)}
+                    sx={{ color: "#DC2626", borderColor: "#FECACA", "&:hover": { backgroundColor: "#FEF2F2" } }}
+                  >
+                    🗑 Delete
+                  </Button>
+                )}
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
 
-      <div className="mt-4 flex gap-2">
-        <button onClick={() => void router.push(`/clients/${clientId}/edit`)} className="border px-2 py-1 text-sm">
-          Edit
-        </button>
-        {user?.role === "ADMIN" && (
-          <button onClick={() => setIsConfirmOpen(true)} className="border px-2 py-1 text-sm">
-            Delete
-          </button>
-        )}
-      </div>
+        {/* Info row */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2.5, mb: 3 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle2" sx={{ color: "#64748B", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
+                Contact Info
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Email</Typography>
+                  <Typography variant="body2" sx={{ color: "#0F172A" }}>{client.contactInfo?.email ?? "—"}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Phone</Typography>
+                  <Typography variant="body2" sx={{ color: "#0F172A" }}>
+                    {client.contactInfo?.phoneCountryCode && client.contactInfo?.phone
+                      ? `${client.contactInfo.phoneCountryCode} ${client.contactInfo.phone}`
+                      : client.contactInfo?.phone ?? "—"}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Address</Typography>
+                  <Typography variant="body2" sx={{ color: "#0F172A" }}>{client.contactInfo?.address ?? "—"}</Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
 
-      <h2 className="mt-6 text-sm font-medium">Lease history</h2>
-      <LeaseHistoryTable leases={client.leases} onArtworkClick={(id) => void router.push(`/artworks/${id}`)} />
-
-      <div className="mt-6">
-        <DocumentLogSection
-          documents={documents.documents}
-          isLoading={documents.isLoading}
-          error={documents.error}
-          canDelete={user?.role === "ADMIN"}
-          fileType={fileType}
-          onFileTypeChange={setFileType}
-          onUpload={(file) => void documents.upload(fileType, file)}
-          onDelete={(id) => void documents.remove(id)}
-        />
-      </div>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle2" sx={{ color: "#64748B", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
+                Profile
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Preferences</Typography>
+                  <Typography variant="body2" sx={{ color: "#0F172A" }}>{client.preferences ?? "—"}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Notes</Typography>
+                  <Typography variant="body2" sx={{ color: "#475569" }}>{client.notes ?? "—"}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Client Since</Typography>
+                  <Typography variant="body2" sx={{ color: "#0F172A" }}>
+                    {new Date(client.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
 
       <ConfirmDialog
-        open={isConfirmOpen}
-        title="Delete client"
-        message={`Delete "${client.name}"? This cannot be undone.`}
-        confirmLabel="Delete"
-        onConfirm={handleDelete}
-        onCancel={() => setIsConfirmOpen(false)}
+        open={deleteOpen}
+        title={`Delete "${client.name}"`}
+        description="This will soft-delete the client and remove them from active lists."
+        confirmLabel="Delete Client"
+        loading={deleteMutation.isPending}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 }

@@ -1,16 +1,24 @@
-import { useRef, useState } from "react";
-import type { ChangeEvent } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { useAuth } from "@artsdiva/hooks/useAuth";
-import { useArtwork } from "@artsdiva/hooks/useArtwork";
-import { useLeases } from "@artsdiva/hooks/useLeases";
+import { motion } from "framer-motion";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import Alert from "@mui/material/Alert";
+import Divider from "@mui/material/Divider";
+import Chip from "@mui/material/Chip";
+import Link from "next/link";
+import { useArtwork, useDeleteArtwork, useUpdateArtworkStatus, useUploadArtworkImages } from "@artsdiva/hooks/useArtworks";
+import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
+import { SkeletonDetailCard } from "@artsdiva/components/ui/SkeletonTable";
+import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
+import { ImageWithFallback } from "@artsdiva/components/ui/ImagePlaceholder";
 import { useToast } from "@artsdiva/contexts/ToastProvider";
-import { ArtworkStatusBadge } from "@artsdiva/components/ArtworkStatusBadge";
-import { ArtworkImageGallery } from "@artsdiva/components/ArtworkImageGallery";
-import { LeaseStatusBadge } from "@artsdiva/components/LeaseStatusBadge";
-import { LeaseActionButtons } from "@artsdiva/components/LeaseActionButtons";
-import { ConfirmDialog } from "@artsdiva/components/ConfirmDialog";
-import { LeaseFormContainer } from "@artsdiva/containers/LeaseFormContainer";
+import { useAuth } from "@artsdiva/hooks/useAuth";
 import type { ArtworkStatus } from "@artsdiva/types/artwork.types";
 
 interface ArtworkDetailContainerProps {
@@ -21,164 +29,229 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
   const router = useRouter();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const { artwork, isLoading, error, deleteArtwork, updateStatus, uploadImages, refetch } = useArtwork(artworkId);
-  const { isSubmitting: isLeaseActionSubmitting, completeLease, cancelLease } = useLeases({ onMutate: refetch });
-  const [showLeaseForm, setShowLeaseForm] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
 
-  const handleDelete = (): void => {
-    setIsConfirmOpen(false);
-    void deleteArtwork().then((success) => {
-      if (success) {
-        showToast("Artwork deleted");
-        void router.push("/artworks");
-      } else {
-        showToast("Failed to delete artwork", "error");
-      }
-    });
+  const { data: artwork, isLoading, error } = useArtwork(artworkId);
+  const deleteMutation = useDeleteArtwork();
+  const statusMutation = useUpdateArtworkStatus(artworkId);
+  const uploadMutation = useUploadArtworkImages(artworkId);
+
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(artworkId);
+      showToast(`"${artwork?.title ?? "Artwork"}" deleted`);
+      void router.push("/artworks");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Failed to delete artwork", "error");
+    }
   };
 
-  const handleCompleteLease = (leaseId: string): void => {
-    void completeLease(leaseId).then((success) => {
-      showToast(success ? "Lease completed" : "Failed to complete lease", success ? "success" : "error");
-    });
+  const handleStatusChange = async (status: ArtworkStatus) => {
+    try {
+      await statusMutation.mutateAsync(status);
+      showToast("Status updated");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Failed to update status", "error");
+    }
   };
 
-  const handleCancelLease = (leaseId: string): void => {
-    void cancelLease(leaseId).then((success) => {
-      showToast(success ? "Lease cancelled" : "Failed to cancel lease", success ? "success" : "error");
-    });
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
-    if (files.length === 0) return;
-    void uploadImages(files).then((success) => {
-      showToast(success ? "Images uploaded" : "Failed to upload images", success ? "success" : "error");
-    });
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (!files.length) return;
+    try {
+      await uploadMutation.mutateAsync(files);
+      showToast("Images uploaded");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Failed to upload images", "error");
+    }
+    e.target.value = "";
   };
 
-  if (isLoading) return <p className="text-sm">Loading...</p>;
-  if (error || !artwork)
+  if (isLoading) return <SkeletonDetailCard />;
+  if (error || !artwork) {
     return (
-      <p role="alert" className="text-sm">
-        {error ?? "Artwork not found"}
-      </p>
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error instanceof Error ? error.message : "Artwork not found"}</Alert>
+      </Box>
     );
+  }
 
-  const activeLease = artwork.activeLease;
+  const dims = artwork.dimensions
+    ? `${artwork.dimensions.width} × ${artwork.dimensions.height} ${artwork.dimensions.unit}`
+    : "—";
+
+  const images = artwork.images ?? [];
 
   return (
-    <div>
-      <h1 className="text-lg font-medium">{artwork.title}</h1>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Box sx={{ p: 3, maxWidth: 1100 }}>
+        {/* Breadcrumb */}
+        <Link href="/artworks" style={{ textDecoration: "none" }}>
+          <Typography variant="body2" sx={{ color: "#94A3B8", mb: 2, cursor: "pointer", "&:hover": { color: "#4F46E5" } }}>
+            ← Back to Artworks
+          </Typography>
+        </Link>
 
-      <dl className="mt-4 grid grid-cols-2 gap-y-1 text-sm">
-        <dt>Artist</dt>
-        <dd>
-          <button onClick={() => void router.push(`/artists/${artwork.artist.id}`)} className="underline">
-            {artwork.artist.name}
-          </button>
-        </dd>
-        <dt>Medium</dt>
-        <dd>{artwork.medium}</dd>
-        <dt>Dimensions</dt>
-        <dd>{artwork.dimensions}</dd>
-        <dt>Year</dt>
-        <dd>{artwork.year}</dd>
-        <dt>Status</dt>
-        <dd>
-          <ArtworkStatusBadge status={artwork.status} />
-        </dd>
-        {activeLease && (
-          <>
-            <dt>Leased to</dt>
-            <dd className="flex items-center gap-2">
-              <button onClick={() => void router.push(`/clients/${activeLease.client.id}`)} className="underline">
-                {activeLease.client.name}
-              </button>
-              <LeaseStatusBadge status={activeLease.status} />
-            </dd>
-          </>
-        )}
-        {artwork.notes && (
-          <>
-            <dt>Notes</dt>
-            <dd>{artwork.notes}</dd>
-          </>
-        )}
-      </dl>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {activeLease ? (
-          <LeaseActionButtons
-            isSubmitting={isLeaseActionSubmitting}
-            onComplete={() => handleCompleteLease(activeLease.id)}
-            onCancel={() => handleCancelLease(activeLease.id)}
-          />
-        ) : (
-          <>
-            <label className="text-sm">
-              Status:
-              <select
-                value={artwork.status}
-                onChange={(e) => void updateStatus(e.target.value as ArtworkStatus)}
-                className="ml-2 border px-2 py-1 text-sm"
+        {/* Header */}
+        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: 3 }}>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: "#0F172A" }}>{artwork.title}</Typography>
+            {artwork.artist && (
+              <Typography
+                variant="body2"
+                sx={{ color: "#4F46E5", mt: 0.5, cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+                onClick={() => void router.push(`/artists/${artwork.artist!.id}`)}
               >
-                <option value="IN_COLLECTION">In collection</option>
-                <option value="SOLD">Sold</option>
-              </select>
-            </label>
-            <button onClick={() => setShowLeaseForm((prev) => !prev)} className="border px-2 py-1 text-sm">
-              {showLeaseForm ? "Cancel lease form" : "Lease this artwork"}
-            </button>
-          </>
-        )}
+                by {artwork.artist.name}
+              </Typography>
+            )}
+          </Box>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => void router.push(`/artworks/${artworkId}/edit`)}
+              sx={{ color: "#64748B", borderColor: "#E2E8F0" }}
+            >
+              ✏️ Edit
+            </Button>
+            {user?.role === "ADMIN" && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setDeleteOpen(true)}
+                sx={{ color: "#DC2626", borderColor: "#FECACA", "&:hover": { backgroundColor: "#FEF2F2" } }}
+              >
+                🗑 Delete
+              </Button>
+            )}
+          </Box>
+        </Box>
 
-        <button onClick={() => void router.push(`/artworks/${artworkId}/edit`)} className="border px-2 py-1 text-sm">
-          Edit
-        </button>
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3, mb: 3 }}>
+          {/* Left: Image gallery */}
+          <Card>
+            <CardContent sx={{ p: 2 }}>
+              <Box sx={{ mb: 1.5 }}>
+                <ImageWithFallback
+                  src={images[selectedImage]}
+                  alt={artwork.title}
+                  width="100%"
+                  height={300}
+                  borderRadius={8}
+                />
+              </Box>
+              {images.length > 1 && (
+                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 1 }}>
+                  {images.map((img, i) => (
+                    <Box
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      sx={{
+                        width: 52,
+                        height: 52,
+                        borderRadius: 1,
+                        overflow: "hidden",
+                        border: i === selectedImage ? "2px solid #4F46E5" : "2px solid transparent",
+                        cursor: "pointer",
+                        opacity: i === selectedImage ? 1 : 0.65,
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      <ImageWithFallback src={img} alt={`${artwork.title} ${i + 1}`} width={52} height={52} borderRadius={0} />
+                    </Box>
+                  ))}
+                </Box>
+              )}
+              <Divider sx={{ my: 1.5 }} />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="caption" sx={{ color: "#94A3B8" }}>
+                  {images.length} {images.length === 1 ? "image" : "images"}
+                </Typography>
+                <Button
+                  component="label"
+                  size="small"
+                  variant="text"
+                  sx={{ ml: "auto", fontSize: "0.75rem" }}
+                  disabled={uploadMutation.isPending}
+                >
+                  {uploadMutation.isPending ? "Uploading…" : "+ Upload"}
+                  <input type="file" accept="image/*" multiple hidden onChange={(e) => void handleImageUpload(e)} />
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
 
-        {user?.role === "ADMIN" && (
-          <button onClick={() => setIsConfirmOpen(true)} className="border px-2 py-1 text-sm">
-            Delete
-          </button>
-        )}
-      </div>
+          {/* Right: Details */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ color: "#64748B", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
+                  Artwork Details
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  {[
+                    { label: "Medium", value: artwork.medium },
+                    { label: "Dimensions", value: dims },
+                    { label: "Year", value: artwork.year },
+                    { label: "Acquired", value: new Date(artwork.acquisitionDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) },
+                  ].map(({ label, value }) => (
+                    <Box key={label}>
+                      <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>{label}</Typography>
+                      <Typography variant="body2" sx={{ color: "#0F172A", fontWeight: 500 }}>{value}</Typography>
+                    </Box>
+                  ))}
+                  {artwork.notes && (
+                    <Box>
+                      <Typography variant="caption" sx={{ color: "#94A3B8", display: "block", mb: 0.25 }}>Notes</Typography>
+                      <Typography variant="body2" sx={{ color: "#475569" }}>{artwork.notes}</Typography>
+                    </Box>
+                  )}
+                </Box>
+              </CardContent>
+            </Card>
 
-      {showLeaseForm && !activeLease && (
-        <div className="mt-4">
-          <LeaseFormContainer
-            artworkId={artworkId}
-            onLeased={() => {
-              setShowLeaseForm(false);
-              showToast("Artwork leased");
-              void refetch();
-            }}
-          />
-        </div>
-      )}
-
-      <h2 className="mt-6 text-sm font-medium">Images</h2>
-      <ArtworkImageGallery images={artwork.images} />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleFileChange}
-        className="mt-2 text-sm"
-      />
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ color: "#64748B", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>
+                  Status
+                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                  <StatusBadge type="artwork" status={artwork.status} />
+                </Box>
+                <TextField
+                  select
+                  size="small"
+                  fullWidth
+                  value={artwork.status}
+                  onChange={(e) => void handleStatusChange(e.target.value as ArtworkStatus)}
+                  disabled={statusMutation.isPending}
+                  sx={{ mt: 1 }}
+                >
+                  <MenuItem value="IN_COLLECTION">🟢 In Collection</MenuItem>
+                  <MenuItem value="ON_LEASE">🔵 On Lease</MenuItem>
+                  <MenuItem value="SOLD">🟡 Sold</MenuItem>
+                </TextField>
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      </Box>
 
       <ConfirmDialog
-        open={isConfirmOpen}
-        title="Delete artwork"
-        message={`Delete "${artwork.title}"? This cannot be undone.`}
-        confirmLabel="Delete"
-        onConfirm={handleDelete}
-        onCancel={() => setIsConfirmOpen(false)}
+        open={deleteOpen}
+        title={`Delete "${artwork.title}"`}
+        description="This will soft-delete the artwork. It will no longer appear in the collection."
+        confirmLabel="Delete Artwork"
+        loading={deleteMutation.isPending}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 }

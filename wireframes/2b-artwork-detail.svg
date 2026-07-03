@@ -1,0 +1,96 @@
+<svg width="1440" height="900" xmlns="http://www.w3.org/2000/svg" font-family="Inter, -apple-system, sans-serif">
+  <rect width="1440" height="900" fill="#F8FAFC"/>
+
+  <!-- Sidebar -->
+  <rect width="220" height="900" fill="#0F172A"/>
+  <rect x="16" y="16" width="188" height="48" rx="8" fill="#1E293B"/>
+  <text x="36" y="44" font-size="15" font-weight="700" fill="#FFFFFF">🎨 ArtsDiva IMS</text>
+  <text x="36" y="109" font-size="13" fill="#94A3B8">Artists</text>
+  <rect x="12" y="124" width="196" height="40" rx="6" fill="#3730A3"/>
+  <text x="36" y="149" font-size="13" font-weight="600" fill="#FFFFFF">Artworks</text>
+  <text x="36" y="195" font-size="13" fill="#94A3B8">Clients</text>
+  <line x1="20" y1="216" x2="200" y2="216" stroke="#1E293B" stroke-width="1"/>
+  <circle cx="36" cy="860" r="16" fill="#1E293B"/>
+  <text x="60" y="865" font-size="12" fill="#94A3B8">Rahul Kumar</text>
+
+  <!-- Top bar -->
+  <rect x="220" y="0" width="1220" height="64" fill="#FFFFFF"/>
+  <line x1="220" y1="64" x2="1440" y2="64" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="248" y="38" font-size="13" fill="#94A3B8">← Artworks</text>
+  <text x="336" y="38" font-size="13" fill="#CBD5E1">/</text>
+  <text x="350" y="38" font-size="13" font-weight="600" fill="#0F172A">Sunset IV</text>
+  <rect x="1296" y="16" width="100" height="36" rx="8" fill="#4F46E5"/>
+  <text x="1328" y="39" font-size="13" font-weight="600" fill="#FFFFFF">Save</text>
+
+  <!-- Left column -->
+  <!-- Image gallery -->
+  <rect x="248" y="80" width="380" height="260" rx="12" fill="#E2E8F0"/>
+  <text x="408" y="218" font-size="48" fill="#94A3B8" text-anchor="middle">🖼</text>
+  <text x="408" y="258" font-size="12" fill="#94A3B8" text-anchor="middle">Sunset IV — main image</text>
+  <!-- Thumbnails -->
+  <rect x="248" y="352" width="88" height="60" rx="6" fill="#E2E8F0"/>
+  <rect x="348" y="352" width="88" height="60" rx="6" fill="#F1F5F9" stroke="#4F46E5" stroke-width="2"/>
+  <rect x="448" y="352" width="88" height="60" rx="6" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="492" y="387" font-size="20" fill="#CBD5E1" text-anchor="middle">+</text>
+  <text x="492" y="404" font-size="10" fill="#94A3B8" text-anchor="middle">Add image</text>
+
+  <!-- Right column: form -->
+  <text x="664" y="100" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">DETAILS</text>
+  <!-- Title -->
+  <text x="664" y="124" font-size="12" fill="#64748B">Title</text>
+  <rect x="664" y="132" width="740" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="680" y="157" font-size="14" fill="#0F172A">Sunset IV</text>
+  <!-- Artist + Medium -->
+  <text x="664" y="192" font-size="12" fill="#64748B">Artist</text>
+  <rect x="664" y="200" width="356" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="680" y="225" font-size="14" fill="#0F172A">Sarah Collins</text>
+  <text x="1008" y="225" font-size="10" fill="#94A3B8">▼</text>
+  <text x="1044" y="192" font-size="12" fill="#64748B">Medium</text>
+  <rect x="1044" y="200" width="360" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="1060" y="225" font-size="14" fill="#0F172A">Oil on canvas</text>
+  <!-- Dimensions + Year -->
+  <text x="664" y="260" font-size="12" fill="#64748B">Dimensions</text>
+  <rect x="664" y="268" width="356" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="680" y="293" font-size="14" fill="#0F172A">24×36 in</text>
+  <text x="1044" y="260" font-size="12" fill="#64748B">Year</text>
+  <rect x="1044" y="268" width="172" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="1060" y="293" font-size="14" fill="#0F172A">2022</text>
+  <!-- Acquisition Date + Status -->
+  <text x="664" y="328" font-size="12" fill="#64748B">Acquisition Date</text>
+  <rect x="664" y="336" width="356" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="680" y="361" font-size="14" fill="#0F172A">01 / 03 / 2022</text>
+  <text x="1044" y="328" font-size="12" fill="#64748B">Status</text>
+  <rect x="1044" y="336" width="360" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="1060" y="361" font-size="14" fill="#0F172A">In Collection</text>
+  <text x="1380" y="361" font-size="10" fill="#94A3B8">▼</text>
+  <!-- Notes -->
+  <text x="664" y="396" font-size="12" fill="#64748B">Notes</text>
+  <rect x="664" y="404" width="740" height="64" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="680" y="426" font-size="14" fill="#94A3B8">Internal notes...</text>
+
+  <!-- CURRENT LEASE panel -->
+  <text x="248" y="448" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">CURRENT LEASE</text>
+  <rect x="248" y="460" width="380" height="88" rx="10" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <rect x="268" y="476" width="84" height="22" rx="11" fill="#DBEAFE"/>
+  <text x="280" y="491" font-size="11" font-weight="500" fill="#1D4ED8">ACTIVE</text>
+  <text x="268" y="518" font-size="13" font-weight="600" fill="#0F172A">James Okoro</text>
+  <text x="268" y="536" font-size="12" fill="#64748B">Since 01 Jan 2026  ·  £200 / month</text>
+
+  <!-- LEASE HISTORY -->
+  <text x="248" y="576" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">LEASE HISTORY</text>
+  <rect x="248" y="588" width="380" height="32" fill="#F1F5F9"/>
+  <text x="264" y="609" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.5">CLIENT</text>
+  <text x="360" y="609" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.5">START</text>
+  <text x="460" y="609" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.5">END</text>
+  <text x="548" y="609" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.5">STATUS</text>
+  <rect x="248" y="620" width="380" height="44" fill="#FFFFFF" stroke="#F1F5F9" stroke-width="1"/>
+  <text x="264" y="647" font-size="13" fill="#0F172A">Tom Rivera</text>
+  <text x="360" y="647" font-size="13" fill="#475569">Mar 2024</text>
+  <text x="460" y="647" font-size="13" fill="#475569">Aug 2024</text>
+  <rect x="548" y="632" width="76" height="20" rx="10" fill="#DCFCE7"/>
+  <text x="558" y="646" font-size="11" fill="#16A34A">Completed</text>
+
+  <!-- Screen label -->
+  <rect x="248" y="840" width="252" height="28" rx="4" fill="#EEF2FF"/>
+  <text x="264" y="859" font-size="11" font-weight="600" fill="#4F46E5">Screen 2B — Artwork Detail / Edit</text>
+</svg>

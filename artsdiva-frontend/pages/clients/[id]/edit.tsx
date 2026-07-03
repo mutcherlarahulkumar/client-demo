@@ -6,8 +6,7 @@ import { ClientFormContainer } from "@artsdiva/containers/ClientFormContainer";
 const EditClientPage: NextPage = () => {
   const router = useRouter();
   const id = typeof router.query.id === "string" ? router.query.id : undefined;
-
-  return <main className="mx-auto max-w-md px-4 py-6">{id && <ClientFormContainer clientId={id} />}</main>;
+  return <>{id && <ClientFormContainer clientId={id} />}</>;
 };
 
 export default withAuth(EditClientPage);

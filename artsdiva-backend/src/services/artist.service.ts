@@ -7,13 +7,16 @@ import type { PaginatedResponse } from "../types/common.types";
 export class ArtistNotFoundError extends Error {}
 export class ArtistHasArtworksError extends Error {}
 
+const notDeleted = { deletedAt: null } satisfies Prisma.ArtistWhereInput;
+
 export async function listArtists(query: ListArtistsQuery): Promise<PaginatedResponse<Artist>> {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
-  const where: Prisma.ArtistWhereInput = query.search
-    ? { name: { contains: query.search, mode: "insensitive" } }
-    : {};
+  const where: Prisma.ArtistWhereInput = {
+    ...notDeleted,
+    ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),
+  };
 
   const [data, total] = await Promise.all([
     prisma.artist.findMany({
@@ -30,8 +33,13 @@ export async function listArtists(query: ListArtistsQuery): Promise<PaginatedRes
 
 export async function getArtistById(id: string): Promise<ArtistWithArtworks> {
   const artist = await prisma.artist.findUnique({
-    where: { id },
-    include: { artworks: true },
+    where: { id, ...notDeleted },
+    include: {
+      artworks: {
+        where: { deletedAt: null },
+        orderBy: { title: "asc" },
+      },
+    },
   });
 
   if (!artist) {
@@ -54,7 +62,7 @@ export async function createArtist(input: CreateArtistInput): Promise<Artist> {
 }
 
 export async function updateArtist(id: string, input: UpdateArtistInput): Promise<Artist> {
-  const existing = await prisma.artist.findUnique({ where: { id } });
+  const existing = await prisma.artist.findUnique({ where: { id, ...notDeleted } });
   if (!existing) {
     throw new ArtistNotFoundError("Artist not found");
   }
@@ -73,19 +81,22 @@ export async function updateArtist(id: string, input: UpdateArtistInput): Promis
 
 export async function deleteArtist(id: string): Promise<void> {
   const artist = await prisma.artist.findUnique({
-    where: { id },
-    include: { artworks: { select: { id: true } } },
+    where: { id, ...notDeleted },
+    include: { artworks: { where: { deletedAt: null }, select: { id: true } } },
   });
 
   if (!artist) {
     throw new ArtistNotFoundError("Artist not found");
   }
 
-  // Business rule: block delete rather than cascade or orphan Artwork
-  // records. Cascade/soft-delete could be revisited later if needed.
   if (artist.artworks.length > 0) {
-    throw new ArtistHasArtworksError("Cannot delete artist with existing artworks");
+    throw new ArtistHasArtworksError(
+      "Cannot delete artist with existing artworks. Remove or reassign their artworks first."
+    );
   }
 
-  await prisma.artist.delete({ where: { id } });
+  await prisma.artist.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
 }

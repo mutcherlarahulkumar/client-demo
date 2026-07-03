@@ -1,0 +1,85 @@
+<svg width="1440" height="900" xmlns="http://www.w3.org/2000/svg" font-family="Inter, -apple-system, sans-serif">
+  <rect width="1440" height="900" fill="#F8FAFC"/>
+
+  <!-- Sidebar -->
+  <rect width="220" height="900" fill="#0F172A"/>
+  <rect x="16" y="16" width="188" height="48" rx="8" fill="#1E293B"/>
+  <text x="36" y="44" font-size="15" font-weight="700" fill="#FFFFFF">🎨 ArtsDiva IMS</text>
+  <text x="36" y="109" font-size="13" fill="#94A3B8">Artists</text>
+  <text x="36" y="153" font-size="13" fill="#94A3B8">Artworks</text>
+  <rect x="12" y="168" width="196" height="40" rx="6" fill="#3730A3"/>
+  <text x="36" y="193" font-size="13" font-weight="600" fill="#FFFFFF">Clients</text>
+  <line x1="20" y1="220" x2="200" y2="220" stroke="#1E293B" stroke-width="1"/>
+  <circle cx="36" cy="860" r="16" fill="#1E293B"/>
+  <text x="60" y="865" font-size="12" fill="#94A3B8">Rahul Kumar</text>
+
+  <!-- Top bar -->
+  <rect x="220" y="0" width="1220" height="64" fill="#FFFFFF"/>
+  <line x1="220" y1="64" x2="1440" y2="64" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="248" y="40" font-size="22" font-weight="700" fill="#0F172A">Clients</text>
+  <rect x="1284" y="16" width="124" height="36" rx="8" fill="#4F46E5"/>
+  <text x="1308" y="39" font-size="13" font-weight="600" fill="#FFFFFF">+ Add Client</text>
+
+  <!-- Search -->
+  <rect x="248" y="88" width="320" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="272" y="113" font-size="13" fill="#94A3B8">🔍  Search clients...</text>
+
+  <!-- Table header -->
+  <rect x="248" y="152" width="1164" height="32" fill="#F1F5F9"/>
+  <text x="268" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">NAME</text>
+  <text x="488" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">EMAIL</text>
+  <text x="768" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">PHONE</text>
+  <text x="988" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">ACTIVE LEASES</text>
+  <text x="1228" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">ACTIONS</text>
+
+  <!-- Row 1 -->
+  <rect x="248" y="184" width="1164" height="56" fill="#FFFFFF" stroke="#F1F5F9" stroke-width="1"/>
+  <!-- Avatar -->
+  <circle cx="284" cy="212" r="18" fill="#EDE9FE"/>
+  <text x="284" y="217" font-size="13" font-weight="700" fill="#7C3AED" text-anchor="middle">JO</text>
+  <text x="314" y="217" font-size="14" font-weight="500" fill="#0F172A">James Okoro</text>
+  <text x="488" y="217" font-size="14" fill="#475569">james@example.com</text>
+  <text x="768" y="217" font-size="14" fill="#475569">+44 7700 900 111</text>
+  <rect x="988" y="200" width="76" height="24" rx="12" fill="#DBEAFE"/>
+  <text x="1002" y="217" font-size="12" font-weight="500" fill="#1D4ED8">1 active</text>
+  <text x="1248" y="219" font-size="20" fill="#CBD5E1" letter-spacing="2">•••</text>
+
+  <!-- Row 2 -->
+  <rect x="248" y="240" width="1164" height="56" fill="#FAFAFA" stroke="#F1F5F9" stroke-width="1"/>
+  <circle cx="284" cy="268" r="18" fill="#FCE7F3"/>
+  <text x="284" y="273" font-size="13" font-weight="700" fill="#BE185D" text-anchor="middle">PN</text>
+  <text x="314" y="273" font-size="14" font-weight="500" fill="#0F172A">Priya Nair</text>
+  <text x="488" y="273" font-size="14" fill="#475569">priya@example.com</text>
+  <text x="768" y="273" font-size="14" fill="#475569">+44 7700 900 222</text>
+  <rect x="988" y="256" width="76" height="24" rx="12" fill="#F1F5F9"/>
+  <text x="1004" y="273" font-size="12" font-weight="500" fill="#64748B">0 active</text>
+  <text x="1248" y="275" font-size="20" fill="#CBD5E1" letter-spacing="2">•••</text>
+
+  <!-- Row 3 -->
+  <rect x="248" y="296" width="1164" height="56" fill="#FFFFFF" stroke="#F1F5F9" stroke-width="1"/>
+  <circle cx="284" cy="324" r="18" fill="#FEF3C7"/>
+  <text x="284" y="329" font-size="13" font-weight="700" fill="#B45309" text-anchor="middle">TR</text>
+  <text x="314" y="329" font-size="14" font-weight="500" fill="#0F172A">Tom Rivera</text>
+  <text x="488" y="329" font-size="14" fill="#475569">tom@example.com</text>
+  <text x="768" y="329" font-size="14" fill="#475569">+44 7700 900 333</text>
+  <rect x="988" y="312" width="76" height="24" rx="12" fill="#F1F5F9"/>
+  <text x="1004" y="329" font-size="12" font-weight="500" fill="#64748B">0 active</text>
+  <text x="1248" y="331" font-size="20" fill="#CBD5E1" letter-spacing="2">•••</text>
+
+  <!-- Row 4 -->
+  <rect x="248" y="352" width="1164" height="56" fill="#FAFAFA" stroke="#F1F5F9" stroke-width="1"/>
+  <circle cx="284" cy="380" r="18" fill="#DCFCE7"/>
+  <text x="284" y="385" font-size="13" font-weight="700" fill="#15803D" text-anchor="middle">AL</text>
+  <text x="314" y="385" font-size="14" font-weight="500" fill="#0F172A">Aisha Laurent</text>
+  <text x="488" y="385" font-size="14" fill="#475569">aisha@example.com</text>
+  <text x="768" y="385" font-size="14" fill="#475569">+44 7700 900 444</text>
+  <rect x="988" y="368" width="76" height="24" rx="12" fill="#DBEAFE"/>
+  <text x="1002" y="385" font-size="12" font-weight="500" fill="#1D4ED8">1 active</text>
+  <text x="1248" y="387" font-size="20" fill="#CBD5E1" letter-spacing="2">•••</text>
+
+  <text x="268" y="432" font-size="12" fill="#94A3B8">Showing 4 of 4 clients</text>
+
+  <!-- Screen label -->
+  <rect x="248" y="840" width="212" height="28" rx="4" fill="#EEF2FF"/>
+  <text x="264" y="859" font-size="11" font-weight="600" fill="#4F46E5">Screen 3A — Client List</text>
+</svg>

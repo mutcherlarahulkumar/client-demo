@@ -2,11 +2,19 @@ import { z } from "zod";
 import { contactInfoSchema, paginationQuerySchema } from "./common.validator";
 
 export const createArtistSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  bio: z.string().optional(),
+  name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(150, "Name too long"),
+  bio: z.string().max(5000, "Bio too long").optional(),
   contactInfo: contactInfoSchema.optional(),
-  commissionTerms: z.string().min(1, "Commission terms are required"),
-  mouStatus: z.enum(["SIGNED", "PENDING", "NOT_REQUIRED"]),
+  commissionTerms: z
+    .string()
+    .min(1, "Commission terms are required")
+    .max(500, "Commission terms too long"),
+  mouStatus: z.enum(["SIGNED", "PENDING", "NOT_REQUIRED"], {
+    errorMap: () => ({ message: "Invalid MOU status" }),
+  }),
 });
 
 export const updateArtistSchema = createArtistSchema.partial();

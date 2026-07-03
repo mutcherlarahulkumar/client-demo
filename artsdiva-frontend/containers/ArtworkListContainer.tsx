@@ -1,72 +1,214 @@
-import { useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { useArtworks } from "@artsdiva/hooks/useArtworks";
-import { useArtists } from "@artsdiva/hooks/useArtists";
-import { ArtworkTable } from "@artsdiva/components/ArtworkTable";
-import type { ArtworkStatus } from "@artsdiva/types/artwork.types";
+import { motion, AnimatePresence } from "framer-motion";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import InputAdornment from "@mui/material/InputAdornment";
+import Alert from "@mui/material/Alert";
+import { useArtworks, useDeleteArtwork } from "@artsdiva/hooks/useArtworks";
+import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
+import { SkeletonTableRows } from "@artsdiva/components/ui/SkeletonTable";
+import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
+import { ImageWithFallback } from "@artsdiva/components/ui/ImagePlaceholder";
+import { useToast } from "@artsdiva/contexts/ToastProvider";
+import { useDebounce } from "@artsdiva/hooks/useDebounce";
+import type { Artwork, ArtworkStatus } from "@artsdiva/types/artwork.types";
 
 export function ArtworkListContainer() {
   const router = useRouter();
-  const { artworks, isLoading, error, search, setSearch, status, setStatus, artistId, setArtistId } =
-    useArtworks();
-  const { artists } = useArtists();
+  const { showToast } = useToast();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<ArtworkStatus | "">("");
+  const debouncedSearch = useDebounce(search, 300);
+  const [deleteTarget, setDeleteTarget] = useState<Artwork | null>(null);
 
-  // Picks up ?status=... from links like the dashboard's "Active leases" card.
-  useEffect(() => {
-    if (!router.isReady) return;
-    const queryStatus = router.query.status;
-    if (typeof queryStatus === "string" && queryStatus !== status) {
-      setStatus(queryStatus as ArtworkStatus);
+  const { data, isLoading, error } = useArtworks({
+    search: debouncedSearch || undefined,
+    status: status || undefined,
+    limit: 20,
+  });
+
+  const deleteMutation = useDeleteArtwork();
+  const artworks = data?.data ?? [];
+  const total = data?.total ?? 0;
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      showToast(`"${deleteTarget.title}" deleted`);
+      setDeleteTarget(null);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Failed to delete artwork", "error");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, router.query.status]);
+  };
+
+  const formatDimensions = (artwork: Artwork) => {
+    const d = artwork.dimensions;
+    if (!d) return "—";
+    return `${d.width} × ${d.height} ${d.unit}`;
+  };
 
   return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <input
-          type="search"
-          placeholder="Search artworks..."
+    <Box sx={{ p: 3, maxWidth: 1200 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: "#0F172A" }}>Artworks</Typography>
+          {!isLoading && (
+            <Typography variant="body2" sx={{ color: "#64748B", mt: 0.25 }}>
+              {total} {total === 1 ? "artwork" : "artworks"} total
+            </Typography>
+          )}
+        </Box>
+        <Button variant="contained" onClick={() => void router.push("/artworks/new")} sx={{ gap: 0.5 }}>
+          + Add Artwork
+        </Button>
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 1.5, mb: 2.5 }}>
+        <TextField
+          size="small"
+          placeholder="Search by title or medium..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border px-2 py-1 text-sm"
+          sx={{ width: 300 }}
+          slotProps={{
+            input: {
+              startAdornment: <InputAdornment position="start"><Typography sx={{ color: "#94A3B8" }}>🔍</Typography></InputAdornment>,
+            },
+          }}
         />
-
-        <select
+        <TextField
+          size="small"
+          select
           value={status}
           onChange={(e) => setStatus(e.target.value as ArtworkStatus | "")}
-          className="border px-2 py-1 text-sm"
+          sx={{ width: 180 }}
         >
-          <option value="">All statuses</option>
-          <option value="IN_COLLECTION">In collection</option>
-          <option value="ON_LEASE">On lease</option>
-          <option value="SOLD">Sold</option>
-        </select>
+          <MenuItem value="">All Statuses</MenuItem>
+          <MenuItem value="IN_COLLECTION">🟢 In Collection</MenuItem>
+          <MenuItem value="ON_LEASE">🔵 On Lease</MenuItem>
+          <MenuItem value="SOLD">🟡 Sold</MenuItem>
+        </TextField>
+      </Box>
 
-        <select value={artistId} onChange={(e) => setArtistId(e.target.value)} className="border px-2 py-1 text-sm">
-          <option value="">All artists</option>
-          {artists.map((artist) => (
-            <option key={artist.id} value={artist.id}>
-              {artist.name}
-            </option>
-          ))}
-        </select>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error instanceof Error ? error.message : "Failed to load artworks"}</Alert>}
 
-        <button onClick={() => void router.push("/artworks/new")} className="ml-auto border px-2 py-1 text-sm">
-          Add Artwork
-        </button>
-      </div>
+      <TableContainer component={Paper} sx={{ borderRadius: 2, border: "1px solid #E2E8F0", boxShadow: "none" }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ width: 56 }}>Image</TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell>Artist</TableCell>
+              <TableCell>Medium</TableCell>
+              <TableCell>Year</TableCell>
+              <TableCell>Dimensions</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {isLoading ? (
+              <SkeletonTableRows rows={6} cols={8} />
+            ) : artworks.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <Typography sx={{ color: "#94A3B8" }}>
+                    {search || status ? "No artworks match your filters." : "No artworks yet. Add one to get started."}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              <AnimatePresence>
+                {artworks.map((artwork, i) => (
+                  <motion.tr
+                    key={artwork.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ delay: i * 0.03, duration: 0.2 }}
+                    style={{ display: "table-row" }}
+                  >
+                    <TableCell>
+                      <ImageWithFallback
+                        src={artwork.images[0]}
+                        alt={artwork.title}
+                        width={44}
+                        height={44}
+                        borderRadius={6}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: "#0F172A" }}>
+                        {artwork.title}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: "#475569" }}>
+                        {artwork.artist?.name ?? "—"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: "#475569" }}>{artwork.medium}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: "#475569" }}>{artwork.year}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: "#475569" }}>{formatDimensions(artwork)}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge type="artwork" status={artwork.status} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
+                        <Tooltip title="View">
+                          <IconButton size="small" onClick={() => void router.push(`/artworks/${artwork.id}`)} sx={{ color: "#64748B" }}>
+                            <Typography sx={{ fontSize: 14 }}>👁</Typography>
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Edit">
+                          <IconButton size="small" onClick={() => void router.push(`/artworks/${artwork.id}/edit`)} sx={{ color: "#64748B" }}>
+                            <Typography sx={{ fontSize: 14 }}>✏️</Typography>
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton size="small" onClick={() => setDeleteTarget(artwork)} sx={{ color: "#64748B", "&:hover": { color: "#DC2626" } }}>
+                            <Typography sx={{ fontSize: 14 }}>🗑</Typography>
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {isLoading && <p className="text-sm">Loading...</p>}
-      {error && (
-        <p role="alert" className="text-sm">
-          {error}
-        </p>
-      )}
-
-      {!isLoading && !error && (
-        <ArtworkTable artworks={artworks} onRowClick={(id) => void router.push(`/artworks/${id}`)} />
-      )}
-    </div>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title={`Delete "${deleteTarget?.title ?? ""}"`}
+        description="This will permanently remove the artwork. This action cannot be undone."
+        confirmLabel="Delete Artwork"
+        loading={deleteMutation.isPending}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
+    </Box>
   );
 }

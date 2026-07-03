@@ -7,13 +7,16 @@ import type { PaginatedResponse } from "../types/common.types";
 export class ClientNotFoundError extends Error {}
 export class ClientHasLeasesError extends Error {}
 
+const notDeleted = { deletedAt: null } satisfies Prisma.ClientWhereInput;
+
 export async function listClients(query: ListClientsQuery): Promise<PaginatedResponse<Client>> {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
-  const where: Prisma.ClientWhereInput = query.search
-    ? { name: { contains: query.search, mode: "insensitive" } }
-    : {};
+  const where: Prisma.ClientWhereInput = {
+    ...notDeleted,
+    ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),
+  };
 
   const [data, total] = await Promise.all([
     prisma.client.findMany({
@@ -30,10 +33,8 @@ export async function listClients(query: ListClientsQuery): Promise<PaginatedRes
 
 export async function getClientById(id: string): Promise<ClientWithLeaseHistory> {
   const client = await prisma.client.findUnique({
-    where: { id },
+    where: { id, ...notDeleted },
     include: {
-      // Newest first; each lease carries enough of its Artwork to render
-      // a lease-history row (title/thumbnail/status) without a second call.
       leases: {
         orderBy: { startDate: "desc" },
         include: {
@@ -64,7 +65,7 @@ export async function createClient(input: CreateClientInput): Promise<Client> {
 }
 
 export async function updateClient(id: string, input: UpdateClientInput): Promise<Client> {
-  const existing = await prisma.client.findUnique({ where: { id } });
+  const existing = await prisma.client.findUnique({ where: { id, ...notDeleted } });
   if (!existing) {
     throw new ClientNotFoundError("Client not found");
   }
@@ -82,7 +83,7 @@ export async function updateClient(id: string, input: UpdateClientInput): Promis
 
 export async function deleteClient(id: string): Promise<void> {
   const client = await prisma.client.findUnique({
-    where: { id },
+    where: { id, ...notDeleted },
     include: { leases: { select: { id: true } } },
   });
 
@@ -90,10 +91,14 @@ export async function deleteClient(id: string): Promise<void> {
     throw new ClientNotFoundError("Client not found");
   }
 
-  // Same blocking pattern as Artist/Artwork delete.
   if (client.leases.length > 0) {
-    throw new ClientHasLeasesError("Cannot delete client with existing lease records");
+    throw new ClientHasLeasesError(
+      "Cannot delete client with existing lease records. Complete or cancel all leases first."
+    );
   }
 
-  await prisma.client.delete({ where: { id } });
+  await prisma.client.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
 }

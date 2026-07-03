@@ -7,7 +7,7 @@ const ArtistDetailPage: NextPage = () => {
   const router = useRouter();
   const id = typeof router.query.id === "string" ? router.query.id : undefined;
 
-  return <main className="mx-auto max-w-2xl px-4 py-6">{id && <ArtistDetailContainer artistId={id} />}</main>;
+  return <>{id && <ArtistDetailContainer artistId={id} />}</>;
 };
 
 export default withAuth(ArtistDetailPage);

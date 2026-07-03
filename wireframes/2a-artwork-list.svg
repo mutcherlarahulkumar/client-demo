@@ -1,0 +1,94 @@
+<svg width="1440" height="900" xmlns="http://www.w3.org/2000/svg" font-family="Inter, -apple-system, sans-serif">
+  <rect width="1440" height="900" fill="#F8FAFC"/>
+
+  <!-- Sidebar -->
+  <rect width="220" height="900" fill="#0F172A"/>
+  <rect x="16" y="16" width="188" height="48" rx="8" fill="#1E293B"/>
+  <text x="36" y="44" font-size="15" font-weight="700" fill="#FFFFFF">🎨 ArtsDiva IMS</text>
+  <text x="36" y="109" font-size="13" fill="#94A3B8">Artists</text>
+  <rect x="12" y="124" width="196" height="40" rx="6" fill="#3730A3"/>
+  <text x="36" y="149" font-size="13" font-weight="600" fill="#FFFFFF">Artworks</text>
+  <text x="36" y="195" font-size="13" fill="#94A3B8">Clients</text>
+  <line x1="20" y1="216" x2="200" y2="216" stroke="#1E293B" stroke-width="1"/>
+  <circle cx="36" cy="860" r="16" fill="#1E293B"/>
+  <text x="60" y="865" font-size="12" fill="#94A3B8">Rahul Kumar</text>
+
+  <!-- Top bar -->
+  <rect x="220" y="0" width="1220" height="64" fill="#FFFFFF"/>
+  <line x1="220" y1="64" x2="1440" y2="64" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="248" y="40" font-size="22" font-weight="700" fill="#0F172A">Artworks</text>
+  <rect x="1284" y="16" width="136" height="36" rx="8" fill="#4F46E5"/>
+  <text x="1304" y="39" font-size="13" font-weight="600" fill="#FFFFFF">+ Add Artwork</text>
+
+  <!-- Filters row -->
+  <rect x="248" y="88" width="320" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="272" y="113" font-size="13" fill="#94A3B8">🔍  Search artworks...</text>
+  <!-- Status filter -->
+  <rect x="584" y="88" width="160" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="600" y="113" font-size="13" fill="#475569">Status: All</text>
+  <text x="724" y="113" font-size="10" fill="#94A3B8">▼</text>
+
+  <!-- Table header -->
+  <rect x="248" y="152" width="1164" height="32" fill="#F1F5F9"/>
+  <text x="268" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">TITLE</text>
+  <text x="488" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">ARTIST</text>
+  <text x="728" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">MEDIUM</text>
+  <text x="968" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">YEAR</text>
+  <text x="1088" y="173" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">STATUS</text>
+
+  <!-- Row 1 -->
+  <rect x="248" y="184" width="1164" height="56" fill="#FFFFFF" stroke="#F1F5F9" stroke-width="1"/>
+  <rect x="268" y="200" width="40" height="24" rx="4" fill="#E2E8F0"/>
+  <text x="322" y="217" font-size="14" font-weight="500" fill="#0F172A">Sunset IV</text>
+  <text x="488" y="217" font-size="14" fill="#4F46E5">Sarah Collins</text>
+  <text x="728" y="217" font-size="14" fill="#475569">Oil on canvas</text>
+  <text x="968" y="217" font-size="14" fill="#475569">2022</text>
+  <rect x="1088" y="200" width="116" height="24" rx="12" fill="#DCFCE7"/>
+  <text x="1100" y="217" font-size="12" font-weight="500" fill="#16A34A">In Collection</text>
+
+  <!-- Row 2 -->
+  <rect x="248" y="240" width="1164" height="56" fill="#FAFAFA" stroke="#F1F5F9" stroke-width="1"/>
+  <rect x="268" y="256" width="40" height="24" rx="4" fill="#E2E8F0"/>
+  <text x="322" y="273" font-size="14" font-weight="500" fill="#0F172A">Blue Form</text>
+  <text x="488" y="273" font-size="14" fill="#4F46E5">Sarah Collins</text>
+  <text x="728" y="273" font-size="14" fill="#475569">Acrylic</text>
+  <text x="968" y="273" font-size="14" fill="#475569">2023</text>
+  <rect x="1088" y="256" width="84" height="24" rx="12" fill="#DBEAFE"/>
+  <text x="1102" y="273" font-size="12" font-weight="500" fill="#1D4ED8">On Lease</text>
+
+  <!-- Row 3 -->
+  <rect x="248" y="296" width="1164" height="56" fill="#FFFFFF" stroke="#F1F5F9" stroke-width="1"/>
+  <rect x="268" y="312" width="40" height="24" rx="4" fill="#E2E8F0"/>
+  <text x="322" y="329" font-size="14" font-weight="500" fill="#0F172A">The Void</text>
+  <text x="488" y="329" font-size="14" fill="#4F46E5">James Okoro</text>
+  <text x="728" y="329" font-size="14" fill="#475569">Mixed media</text>
+  <text x="968" y="329" font-size="14" fill="#475569">2021</text>
+  <rect x="1088" y="312" width="52" height="24" rx="12" fill="#FEE2E2"/>
+  <text x="1102" y="329" font-size="12" font-weight="500" fill="#DC2626">Sold</text>
+
+  <!-- Row 4 -->
+  <rect x="248" y="352" width="1164" height="56" fill="#FAFAFA" stroke="#F1F5F9" stroke-width="1"/>
+  <rect x="268" y="368" width="40" height="24" rx="4" fill="#E2E8F0"/>
+  <text x="322" y="385" font-size="14" font-weight="500" fill="#0F172A">Storm I</text>
+  <text x="488" y="385" font-size="14" fill="#4F46E5">Mia Lawson</text>
+  <text x="728" y="385" font-size="14" fill="#475569">Watercolour</text>
+  <text x="968" y="385" font-size="14" fill="#475569">2023</text>
+  <rect x="1088" y="368" width="116" height="24" rx="12" fill="#DCFCE7"/>
+  <text x="1100" y="385" font-size="12" font-weight="500" fill="#16A34A">In Collection</text>
+
+  <!-- Row 5 -->
+  <rect x="248" y="408" width="1164" height="56" fill="#FFFFFF" stroke="#F1F5F9" stroke-width="1"/>
+  <rect x="268" y="424" width="40" height="24" rx="4" fill="#E2E8F0"/>
+  <text x="322" y="441" font-size="14" font-weight="500" fill="#0F172A">Ember Study</text>
+  <text x="488" y="441" font-size="14" fill="#4F46E5">Tom Rivera</text>
+  <text x="728" y="441" font-size="14" fill="#475569">Oil on canvas</text>
+  <text x="968" y="441" font-size="14" fill="#475569">2020</text>
+  <rect x="1088" y="424" width="116" height="24" rx="12" fill="#DCFCE7"/>
+  <text x="1100" y="441" font-size="12" font-weight="500" fill="#16A34A">In Collection</text>
+
+  <text x="268" y="488" font-size="12" fill="#94A3B8">Showing 5 of 5 artworks</text>
+
+  <!-- Screen label -->
+  <rect x="248" y="840" width="224" height="28" rx="4" fill="#EEF2FF"/>
+  <text x="264" y="859" font-size="11" font-weight="600" fill="#4F46E5">Screen 2A — Artwork List</text>
+</svg>

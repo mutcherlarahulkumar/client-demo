@@ -13,11 +13,14 @@ export class ArtworkNotFoundError extends Error {}
 export class ArtistNotFoundForArtworkError extends Error {}
 export class ArtworkHasLeasesError extends Error {}
 
+const notDeleted = { deletedAt: null } satisfies Prisma.ArtworkWhereInput;
+
 export async function listArtworks(query: ListArtworksQuery): Promise<PaginatedResponse<Artwork>> {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
   const where: Prisma.ArtworkWhereInput = {
+    ...notDeleted,
     ...(query.search
       ? {
           OR: [
@@ -33,6 +36,7 @@ export async function listArtworks(query: ListArtworksQuery): Promise<PaginatedR
   const [data, total] = await Promise.all([
     prisma.artwork.findMany({
       where,
+      include: { artist: { select: { id: true, name: true } } },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { title: "asc" },
@@ -45,7 +49,7 @@ export async function listArtworks(query: ListArtworksQuery): Promise<PaginatedR
 
 export async function getArtworkById(id: string): Promise<ArtworkWithRelations> {
   const artwork = await prisma.artwork.findUnique({
-    where: { id },
+    where: { id, ...notDeleted },
     include: {
       artist: true,
       leaseHistory: {
@@ -66,7 +70,9 @@ export async function getArtworkById(id: string): Promise<ArtworkWithRelations> 
 }
 
 export async function createArtwork(input: CreateArtworkInput): Promise<Artwork> {
-  const artist = await prisma.artist.findUnique({ where: { id: input.artistId } });
+  const artist = await prisma.artist.findUnique({
+    where: { id: input.artistId, deletedAt: null },
+  });
   if (!artist) {
     throw new ArtistNotFoundForArtworkError("Artist not found");
   }
@@ -87,13 +93,15 @@ export async function createArtwork(input: CreateArtworkInput): Promise<Artwork>
 }
 
 export async function updateArtwork(id: string, input: UpdateArtworkInput): Promise<Artwork> {
-  const existing = await prisma.artwork.findUnique({ where: { id } });
+  const existing = await prisma.artwork.findUnique({ where: { id, ...notDeleted } });
   if (!existing) {
     throw new ArtworkNotFoundError("Artwork not found");
   }
 
   if (input.artistId) {
-    const artist = await prisma.artist.findUnique({ where: { id: input.artistId } });
+    const artist = await prisma.artist.findUnique({
+      where: { id: input.artistId, deletedAt: null },
+    });
     if (!artist) {
       throw new ArtistNotFoundForArtworkError("Artist not found");
     }
@@ -115,17 +123,11 @@ export async function updateArtwork(id: string, input: UpdateArtworkInput): Prom
   });
 }
 
-// Dedicated status-only update. NOTE: this intentionally does NOT create or
-// touch any Lease record — that's the Lease module's responsibility (Prompt
-// 8), which keeps Artwork.status and Lease.status in sync transactionally
-// (e.g. completing a lease flips the artwork back to IN_COLLECTION). Calling
-// this directly with ON_LEASE without a matching Lease record will desync
-// the two — prefer POST /api/leases for lease-driven transitions.
 export async function updateArtworkStatus(
   id: string,
   input: UpdateArtworkStatusInput
 ): Promise<Artwork> {
-  const existing = await prisma.artwork.findUnique({ where: { id } });
+  const existing = await prisma.artwork.findUnique({ where: { id, ...notDeleted } });
   if (!existing) {
     throw new ArtworkNotFoundError("Artwork not found");
   }
@@ -137,7 +139,7 @@ export async function updateArtworkStatus(
 }
 
 export async function addArtworkImages(id: string, urls: string[]): Promise<Artwork> {
-  const existing = await prisma.artwork.findUnique({ where: { id } });
+  const existing = await prisma.artwork.findUnique({ where: { id, ...notDeleted } });
   if (!existing) {
     throw new ArtworkNotFoundError("Artwork not found");
   }
@@ -150,7 +152,7 @@ export async function addArtworkImages(id: string, urls: string[]): Promise<Artw
 
 export async function deleteArtwork(id: string): Promise<void> {
   const artwork = await prisma.artwork.findUnique({
-    where: { id },
+    where: { id, ...notDeleted },
     include: { leaseHistory: { select: { id: true } } },
   });
 
@@ -158,10 +160,14 @@ export async function deleteArtwork(id: string): Promise<void> {
     throw new ArtworkNotFoundError("Artwork not found");
   }
 
-  // Same blocking pattern as Artist delete — no orphaned Lease history.
   if (artwork.leaseHistory.length > 0) {
-    throw new ArtworkHasLeasesError("Cannot delete artwork with existing lease records");
+    throw new ArtworkHasLeasesError(
+      "Cannot delete artwork with existing lease records. Complete or cancel all leases first."
+    );
   }
 
-  await prisma.artwork.delete({ where: { id } });
+  await prisma.artwork.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
 }

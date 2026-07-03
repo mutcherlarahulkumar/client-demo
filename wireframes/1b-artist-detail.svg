@@ -1,0 +1,101 @@
+<svg width="1440" height="900" xmlns="http://www.w3.org/2000/svg" font-family="Inter, -apple-system, sans-serif">
+  <rect width="1440" height="900" fill="#F8FAFC"/>
+
+  <!-- Sidebar -->
+  <rect width="220" height="900" fill="#0F172A"/>
+  <rect x="16" y="16" width="188" height="48" rx="8" fill="#1E293B"/>
+  <text x="36" y="44" font-size="15" font-weight="700" fill="#FFFFFF">🎨 ArtsDiva IMS</text>
+  <rect x="12" y="84" width="196" height="40" rx="6" fill="#3730A3"/>
+  <text x="36" y="109" font-size="13" font-weight="600" fill="#FFFFFF">Artists</text>
+  <text x="36" y="155" font-size="13" fill="#94A3B8">Artworks</text>
+  <text x="36" y="199" font-size="13" fill="#94A3B8">Clients</text>
+  <line x1="20" y1="220" x2="200" y2="220" stroke="#1E293B" stroke-width="1"/>
+  <circle cx="36" cy="860" r="16" fill="#1E293B"/>
+  <text x="60" y="865" font-size="12" fill="#94A3B8">Rahul Kumar</text>
+
+  <!-- Top bar -->
+  <rect x="220" y="0" width="1220" height="64" fill="#FFFFFF"/>
+  <line x1="220" y1="64" x2="1440" y2="64" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Breadcrumb -->
+  <text x="248" y="38" font-size="13" fill="#94A3B8">← Artists</text>
+  <text x="320" y="38" font-size="13" fill="#CBD5E1">/</text>
+  <text x="334" y="38" font-size="13" font-weight="600" fill="#0F172A">Sarah Collins</text>
+  <!-- Save button -->
+  <rect x="1296" y="16" width="100" height="36" rx="8" fill="#4F46E5"/>
+  <text x="1328" y="39" font-size="13" font-weight="600" fill="#FFFFFF">Save</text>
+
+  <!-- Two-column layout -->
+  <!-- Left column: form fields -->
+  <!-- PROFILE section -->
+  <text x="248" y="100" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">PROFILE</text>
+  <!-- Name field -->
+  <text x="248" y="128" font-size="12" fill="#64748B">Name</text>
+  <rect x="248" y="136" width="560" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="264" y="161" font-size="14" fill="#0F172A">Sarah Collins</text>
+  <!-- Bio field -->
+  <text x="248" y="196" font-size="12" fill="#64748B">Bio</text>
+  <rect x="248" y="204" width="560" height="80" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="264" y="226" font-size="14" fill="#0F172A">Painter based in London. Known for large-scale</text>
+  <text x="264" y="246" font-size="14" fill="#0F172A">abstract oil works exploring colour and texture.</text>
+
+  <!-- CONTACT INFO section -->
+  <text x="248" y="312" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">CONTACT INFO</text>
+  <!-- Email -->
+  <text x="248" y="340" font-size="12" fill="#64748B">Email</text>
+  <rect x="248" y="348" width="560" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="264" y="373" font-size="14" fill="#0F172A">sarah@example.com</text>
+  <!-- Phone -->
+  <text x="248" y="408" font-size="12" fill="#64748B">Phone</text>
+  <rect x="248" y="416" width="270" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="264" y="441" font-size="14" fill="#0F172A">+44 7700 900000</text>
+  <!-- Address -->
+  <text x="536" y="408" font-size="12" fill="#64748B">Address</text>
+  <rect x="536" y="416" width="272" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="552" y="441" font-size="14" fill="#0F172A">12 Studio Lane, London</text>
+
+  <!-- TERMS & STATUS section -->
+  <text x="248" y="480" font-size="11" font-weight="700" fill="#64748B" letter-spacing="0.8">TERMS &amp; STATUS</text>
+  <!-- Commission -->
+  <text x="248" y="508" font-size="12" fill="#64748B">Commission Terms</text>
+  <rect x="248" y="516" width="270" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="264" y="541" font-size="14" fill="#0F172A">30% on sale</text>
+  <!-- MOU Status -->
+  <text x="536" y="508" font-size="12" fill="#64748B">MOU Status</text>
+  <rect x="536" y="516" width="272" height="40" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="552" y="541" font-size="14" fill="#0F172A">Signed</text>
+  <text x="784" y="541" font-size="10" fill="#94A3B8">▼</text>
+
+  <!-- Right column: Linked artworks -->
+  <rect x="856" y="80" width="556" height="400" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="876" y="112" font-size="14" font-weight="700" fill="#0F172A">Linked Artworks</text>
+  <text x="1340" y="112" font-size="12" fill="#4F46E5">3 total</text>
+  <line x1="876" y1="124" x2="1392" y2="124" stroke="#F1F5F9" stroke-width="1"/>
+  <!-- Artwork row 1 -->
+  <rect x="876" y="136" width="512" height="72" rx="8" fill="#F8FAFC"/>
+  <rect x="892" y="148" width="48" height="48" rx="6" fill="#E2E8F0"/>
+  <text x="904" y="178" font-size="18" fill="#94A3B8">🖼</text>
+  <text x="952" y="168" font-size="13" font-weight="600" fill="#0F172A">Sunset IV</text>
+  <text x="952" y="188" font-size="12" fill="#94A3B8">Oil on canvas · 2022</text>
+  <rect x="1284" y="152" width="104" height="22" rx="11" fill="#DCFCE7"/>
+  <text x="1296" y="167" font-size="11" font-weight="500" fill="#16A34A">In Collection</text>
+  <!-- Artwork row 2 -->
+  <rect x="876" y="220" width="512" height="72" rx="8" fill="#F8FAFC"/>
+  <rect x="892" y="232" width="48" height="48" rx="6" fill="#E2E8F0"/>
+  <text x="904" y="262" font-size="18" fill="#94A3B8">🖼</text>
+  <text x="952" y="252" font-size="13" font-weight="600" fill="#0F172A">Blue Form</text>
+  <text x="952" y="272" font-size="12" fill="#94A3B8">Acrylic · 2023</text>
+  <rect x="1296" y="236" width="84" height="22" rx="11" fill="#DBEAFE"/>
+  <text x="1310" y="251" font-size="11" font-weight="500" fill="#1D4ED8">On Lease</text>
+  <!-- Artwork row 3 -->
+  <rect x="876" y="304" width="512" height="72" rx="8" fill="#F8FAFC"/>
+  <rect x="892" y="316" width="48" height="48" rx="6" fill="#E2E8F0"/>
+  <text x="904" y="346" font-size="18" fill="#94A3B8">🖼</text>
+  <text x="952" y="336" font-size="13" font-weight="600" fill="#0F172A">Void III</text>
+  <text x="952" y="356" font-size="12" fill="#94A3B8">Mixed media · 2024</text>
+  <rect x="1284" y="320" width="104" height="22" rx="11" fill="#DCFCE7"/>
+  <text x="1296" y="335" font-size="11" font-weight="500" fill="#16A34A">In Collection</text>
+
+  <!-- Screen label -->
+  <rect x="248" y="840" width="220" height="28" rx="4" fill="#EEF2FF"/>
+  <text x="264" y="859" font-size="11" font-weight="600" fill="#4F46E5">Screen 1B — Artist Detail / Edit</text>
+</svg>

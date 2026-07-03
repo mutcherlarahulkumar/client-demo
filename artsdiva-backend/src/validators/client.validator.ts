@@ -2,10 +2,13 @@ import { z } from "zod";
 import { contactInfoSchema, paginationQuerySchema } from "./common.validator";
 
 export const createClientSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(150, "Name too long"),
   contactInfo: contactInfoSchema.optional(),
-  preferences: z.string().optional(),
-  notes: z.string().optional(),
+  preferences: z.string().max(2000, "Preferences too long").optional(),
+  notes: z.string().max(2000, "Notes too long").optional(),
 });
 
 export const updateClientSchema = createClientSchema.partial();

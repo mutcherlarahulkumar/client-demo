@@ -12,7 +12,8 @@ interface LeaseFormContainerProps {
 
 // Rendered inline from the Artwork detail page's "Lease this artwork" button.
 export function LeaseFormContainer({ artworkId, onLeased }: LeaseFormContainerProps) {
-  const { clients } = useClients();
+  const { data: clientsData } = useClients({});
+  const clients = clientsData?.data ?? [];
   const { isSubmitting, error, fieldErrors, createLease } = useLeases({ onMutate: onLeased });
   const [values, setValues] = useState<LeaseFormValues>(emptyValues);
 
