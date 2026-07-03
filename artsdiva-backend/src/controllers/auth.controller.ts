@@ -7,6 +7,16 @@ const isProduction = process.env.NODE_ENV === "production";
 // Mirrors JWT_EXPIRES_IN's default so the cookie doesn't outlive the token.
 const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
+// Frontend and backend are on different domains in production (Vercel /
+// Render, or any two hosts without a shared apex domain) -- SameSite=None
+// is required for the browser to send the cookie on cross-site fetch()
+// calls, which in turn requires Secure. Locally, frontend/backend are both
+// "localhost" (same-site regardless of port), so Lax + non-Secure is fine
+// over plain http. If frontend and backend ever share an apex domain
+// (app.example.com / api.example.com), Lax works there too and is the
+// safer default -- swap this back if/when that's set up.
+const COOKIE_SAME_SITE = isProduction ? "none" : "lax";
+
 export async function loginHandler(req: Request, res: Response): Promise<void> {
   const input = req.body as LoginDTO;
 
@@ -16,7 +26,7 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
     res.cookie(AUTH_COOKIE_NAME, token, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: "lax",
+      sameSite: COOKIE_SAME_SITE,
       maxAge: COOKIE_MAX_AGE_MS,
     });
 
@@ -62,6 +72,12 @@ export async function meHandler(req: Request, res: Response): Promise<void> {
 }
 
 export function logoutHandler(_req: Request, res: Response): void {
-  res.clearCookie(AUTH_COOKIE_NAME);
+  // Must match the attributes the cookie was set with, or some browsers
+  // won't recognize it as the same cookie to clear.
+  res.clearCookie(AUTH_COOKIE_NAME, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: COOKIE_SAME_SITE,
+  });
   res.status(200).json({ message: "Logged out" });
 }
