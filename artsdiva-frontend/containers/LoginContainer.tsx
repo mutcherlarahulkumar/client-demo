@@ -15,7 +15,12 @@ export function LoginContainer() {
     void login({ email, password }).then((success) => {
       if (success) {
         showToast("Signed in");
-        void router.push("/");
+        // Only ever redirect to a relative in-app path — never trust
+        // ?next= as-is, or an absolute/protocol-relative URL could be
+        // used for an open-redirect.
+        const rawNext = router.query.next;
+        const next = typeof rawNext === "string" && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+        void router.push(next);
       }
     });
   };

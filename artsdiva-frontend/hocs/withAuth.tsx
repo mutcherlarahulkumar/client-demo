@@ -16,7 +16,10 @@ export function withAuth<P extends object>(Component: ComponentType<P>, allowedR
       if (isLoading) return;
 
       if (!user) {
-        void router.replace("/login");
+        // Remember where they were headed so login can send them back
+        // instead of always landing on the dashboard.
+        const next = router.asPath;
+        void router.replace(next && next !== "/" ? `/login?next=${encodeURIComponent(next)}` : "/login");
         return;
       }
 
