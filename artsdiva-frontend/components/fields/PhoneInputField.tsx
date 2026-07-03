@@ -8,17 +8,17 @@ import FormHelperText from "@mui/material/FormHelperText";
 import Typography from "@mui/material/Typography";
 
 const COUNTRY_CODES = [
-  { code: "+91",  flag: "🇮🇳", country: "India" },
-  { code: "+1",   flag: "🇺🇸", country: "USA" },
-  { code: "+44",  flag: "🇬🇧", country: "UK" },
-  { code: "+61",  flag: "🇦🇺", country: "Australia" },
+  { code: "+91", flag: "🇮🇳", country: "India" },
+  { code: "+1", flag: "🇺🇸", country: "USA" },
+  { code: "+44", flag: "🇬🇧", country: "UK" },
+  { code: "+61", flag: "🇦🇺", country: "Australia" },
   { code: "+971", flag: "🇦🇪", country: "UAE" },
-  { code: "+65",  flag: "🇸🇬", country: "Singapore" },
-  { code: "+49",  flag: "🇩🇪", country: "Germany" },
-  { code: "+33",  flag: "🇫🇷", country: "France" },
-  { code: "+81",  flag: "🇯🇵", country: "Japan" },
-  { code: "+86",  flag: "🇨🇳", country: "China" },
-  { code: "+27",  flag: "🇿🇦", country: "South Africa" },
+  { code: "+65", flag: "🇸🇬", country: "Singapore" },
+  { code: "+49", flag: "🇩🇪", country: "Germany" },
+  { code: "+33", flag: "🇫🇷", country: "France" },
+  { code: "+81", flag: "🇯🇵", country: "Japan" },
+  { code: "+86", flag: "🇨🇳", country: "China" },
+  { code: "+27", flag: "🇿🇦", country: "South Africa" },
   { code: "+234", flag: "🇳🇬", country: "Nigeria" },
 ];
 
@@ -46,21 +46,43 @@ export function PhoneInputField({
 
   return (
     <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
-      <FormControl size="small" error={!!countryCodeError} sx={{ flexShrink: 0, width: 120 }}>
+      <FormControl
+        size="small"
+        error={!!countryCodeError}
+        sx={{ flexShrink: 0, width: 120 }}
+      >
         <Select
           value={selectedCode}
           onChange={(e) => onCountryCodeChange(e.target.value)}
           disabled={disabled}
           displayEmpty
           MenuProps={{
-            PaperProps: { sx: { maxHeight: 280, minWidth: 220 } },
-            anchorOrigin: { vertical: "bottom", horizontal: "left" },
-            transformOrigin: { vertical: "top", horizontal: "left" },
+            slotProps: {
+              paper: {
+                sx: {
+                  maxHeight: 280,
+                  minWidth: 220,
+                },
+              },
+            },
+            anchorOrigin: {
+              vertical: "bottom",
+              horizontal: "left",
+            },
+            transformOrigin: {
+              vertical: "top",
+              horizontal: "left",
+            },
           }}
           renderValue={() => (
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <span style={{ fontSize: "1.1rem", lineHeight: 1 }}>{found?.flag ?? "🌍"}</span>
-              <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1 }}>
+              <span style={{ fontSize: "1.1rem", lineHeight: 1 }}>
+                {found?.flag ?? "🌍"}
+              </span>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 500, lineHeight: 1 }}
+              >
                 {selectedCode}
               </Typography>
             </Box>
@@ -68,17 +90,35 @@ export function PhoneInputField({
         >
           {COUNTRY_CODES.map((c) => (
             <MenuItem key={c.code} value={c.code}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
-                <span style={{ fontSize: "1.1rem", lineHeight: 1, flexShrink: 0 }}>{c.flag}</span>
-                <Typography variant="body2" sx={{ flex: 1 }}>{c.country}</Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  width: "100%",
+                }}
+              >
+                <span
+                  style={{ fontSize: "1.1rem", lineHeight: 1, flexShrink: 0 }}
+                >
+                  {c.flag}
+                </span>
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  {c.country}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "text.secondary", fontWeight: 500 }}
+                >
                   {c.code}
                 </Typography>
               </Box>
             </MenuItem>
           ))}
         </Select>
-        {countryCodeError && <FormHelperText>{countryCodeError}</FormHelperText>}
+        {countryCodeError && (
+          <FormHelperText>{countryCodeError}</FormHelperText>
+        )}
       </FormControl>
 
       <TextField
