@@ -3,7 +3,8 @@ import { useRouter } from "next/router";
 import { createArtwork, updateArtwork } from "@artsdiva/api/artwork.api";
 import { useArtwork } from "@artsdiva/hooks/useArtwork";
 import { useArtists } from "@artsdiva/hooks/useArtists";
-import { ApiError } from "@artsdiva/api/http";
+import { ApiError, type FieldErrors } from "@artsdiva/api/http";
+import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { ArtworkForm, type ArtworkFormValues } from "@artsdiva/components/ArtworkForm";
 
 const emptyValues: ArtworkFormValues = {
@@ -23,12 +24,14 @@ interface ArtworkFormContainerProps {
 
 export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const isEditMode = Boolean(artworkId);
   const { artwork } = useArtwork(artworkId);
   const { artists } = useArtists();
   const [values, setValues] = useState<ArtworkFormValues>(emptyValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
 
   // Adjust form state when the fetched artwork arrives, computed during
   // render rather than in an effect (avoids an extra render pass — see
@@ -55,6 +58,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
   const handleSubmit = (): void => {
     setIsSubmitting(true);
     setError(null);
+    setFieldErrors(null);
 
     const payload = {
       title: values.title,
@@ -71,10 +75,16 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
 
     void request
       .then((savedArtwork) => {
+        showToast(isEditMode ? "Artwork updated" : "Artwork created");
         void router.push(`/artworks/${savedArtwork.id}`);
       })
       .catch((err) => {
-        setError(err instanceof ApiError ? err.message : "Failed to save artwork");
+        if (err instanceof ApiError) {
+          setError(err.message);
+          setFieldErrors(err.fieldErrors ?? null);
+        } else {
+          setError("Failed to save artwork");
+        }
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -89,6 +99,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
         artists={artists.map((a) => ({ id: a.id, name: a.name }))}
         isSubmitting={isSubmitting}
         error={error}
+        fieldErrors={fieldErrors}
         onChange={handleChange}
         onSubmit={handleSubmit}
         submitLabel={isEditMode ? "Save changes" : "Create artwork"}

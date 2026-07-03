@@ -3,8 +3,10 @@ import { useRouter } from "next/router";
 import { useAuth } from "@artsdiva/hooks/useAuth";
 import { useClient } from "@artsdiva/hooks/useClient";
 import { useDocuments } from "@artsdiva/hooks/useDocuments";
+import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { LeaseHistoryTable } from "@artsdiva/components/LeaseHistoryTable";
 import { DocumentLogSection } from "@artsdiva/components/DocumentLogSection";
+import { ConfirmDialog } from "@artsdiva/components/ConfirmDialog";
 import type { DocumentFileType } from "@artsdiva/types/document.types";
 
 interface ClientDetailContainerProps {
@@ -16,14 +18,21 @@ interface ClientDetailContainerProps {
 export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { client, isLoading, error, deleteClient } = useClient(clientId);
   const documents = useDocuments("CLIENT", clientId);
   const [fileType, setFileType] = useState<DocumentFileType>("MOU");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const handleDelete = (): void => {
-    if (!window.confirm("Delete this client?")) return;
+    setIsConfirmOpen(false);
     void deleteClient().then((success) => {
-      if (success) void router.push("/clients");
+      if (success) {
+        showToast("Client deleted");
+        void router.push("/clients");
+      } else {
+        showToast("Failed to delete client", "error");
+      }
     });
   };
 
@@ -77,7 +86,7 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
           Edit
         </button>
         {user?.role === "ADMIN" && (
-          <button onClick={handleDelete} className="border px-2 py-1 text-sm">
+          <button onClick={() => setIsConfirmOpen(true)} className="border px-2 py-1 text-sm">
             Delete
           </button>
         )}
@@ -98,6 +107,15 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
           onDelete={(id) => void documents.remove(id)}
         />
       </div>
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title="Delete client"
+        message={`Delete "${client.name}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </div>
   );
 }

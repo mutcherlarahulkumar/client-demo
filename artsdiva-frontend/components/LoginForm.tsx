@@ -1,8 +1,11 @@
+import type { FieldErrors } from "@artsdiva/api/http";
+
 interface LoginFormProps {
   email: string;
   password: string;
   isLoading: boolean;
   error: string | null;
+  fieldErrors: FieldErrors | null;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onSubmit: () => void;
@@ -14,6 +17,7 @@ export function LoginForm({
   password,
   isLoading,
   error,
+  fieldErrors,
   onEmailChange,
   onPasswordChange,
   onSubmit,
@@ -39,6 +43,7 @@ export function LoginForm({
             onChange={(e) => onEmailChange(e.target.value)}
             className="border px-2 py-1"
           />
+          {fieldErrors?.email && <span className="text-xs text-red-700">{fieldErrors.email[0]}</span>}
         </label>
 
         <label htmlFor="password" className="flex flex-col gap-1 text-sm">
@@ -51,10 +56,11 @@ export function LoginForm({
             onChange={(e) => onPasswordChange(e.target.value)}
             className="border px-2 py-1"
           />
+          {fieldErrors?.password && <span className="text-xs text-red-700">{fieldErrors.password[0]}</span>}
         </label>
 
         {error && (
-          <p role="alert" className="text-sm">
+          <p role="alert" className="text-sm text-red-700">
             {error}
           </p>
         )}

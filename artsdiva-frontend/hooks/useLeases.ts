@@ -4,7 +4,7 @@ import {
   completeLease as completeLeaseRequest,
   createLease as createLeaseRequest,
 } from "@artsdiva/api/lease.api";
-import { ApiError } from "@artsdiva/api/http";
+import { ApiError, type FieldErrors } from "@artsdiva/api/http";
 import type { CreateLeaseDTO, Lease } from "@artsdiva/types/lease.types";
 
 interface UseLeasesOptions {
@@ -16,6 +16,7 @@ interface UseLeasesOptions {
 interface UseLeasesResult {
   isSubmitting: boolean;
   error: string | null;
+  fieldErrors: FieldErrors | null;
   createLease: (payload: CreateLeaseDTO) => Promise<Lease | null>;
   completeLease: (id: string) => Promise<boolean>;
   cancelLease: (id: string) => Promise<boolean>;
@@ -24,17 +25,24 @@ interface UseLeasesResult {
 export function useLeases(options?: UseLeasesOptions): UseLeasesResult {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
 
   const runMutation = useCallback(
     async <T,>(action: () => Promise<T>): Promise<T | null> => {
       setIsSubmitting(true);
       setError(null);
+      setFieldErrors(null);
       try {
         const result = await action();
         await options?.onMutate?.();
         return result;
       } catch (err) {
-        setError(err instanceof ApiError ? err.message : "Lease action failed");
+        if (err instanceof ApiError) {
+          setError(err.message);
+          setFieldErrors(err.fieldErrors ?? null);
+        } else {
+          setError("Lease action failed");
+        }
         return null;
       } finally {
         setIsSubmitting(false);
@@ -58,5 +66,5 @@ export function useLeases(options?: UseLeasesOptions): UseLeasesResult {
     [runMutation]
   );
 
-  return { isSubmitting, error, createLease, completeLease, cancelLease };
+  return { isSubmitting, error, fieldErrors, createLease, completeLease, cancelLease };
 }

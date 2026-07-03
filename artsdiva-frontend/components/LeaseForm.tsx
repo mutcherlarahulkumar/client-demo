@@ -1,3 +1,5 @@
+import type { FieldErrors } from "@artsdiva/api/http";
+
 export interface LeaseFormValues {
   clientId: string;
   startDate: string;
@@ -14,11 +16,12 @@ interface LeaseFormProps {
   clients: LeaseFormClientOption[];
   isSubmitting: boolean;
   error: string | null;
+  fieldErrors: FieldErrors | null;
   onChange: <K extends keyof LeaseFormValues>(field: K, value: LeaseFormValues[K]) => void;
   onSubmit: () => void;
 }
 
-export function LeaseForm({ values, clients, isSubmitting, error, onChange, onSubmit }: LeaseFormProps) {
+export function LeaseForm({ values, clients, isSubmitting, error, fieldErrors, onChange, onSubmit }: LeaseFormProps) {
   return (
     <form
       className="flex max-w-md flex-col gap-3"
@@ -42,6 +45,7 @@ export function LeaseForm({ values, clients, isSubmitting, error, onChange, onSu
             </option>
           ))}
         </select>
+        {fieldErrors?.clientId && <span className="text-xs text-red-700">{fieldErrors.clientId[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -53,6 +57,7 @@ export function LeaseForm({ values, clients, isSubmitting, error, onChange, onSu
           onChange={(e) => onChange("startDate", e.target.value)}
           required
         />
+        {fieldErrors?.startDate && <span className="text-xs text-red-700">{fieldErrors.startDate[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -61,7 +66,7 @@ export function LeaseForm({ values, clients, isSubmitting, error, onChange, onSu
       </label>
 
       {error && (
-        <p role="alert" className="text-sm">
+        <p role="alert" className="text-sm text-red-700">
           {error}
         </p>
       )}

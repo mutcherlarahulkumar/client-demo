@@ -1,3 +1,5 @@
+import type { FieldErrors } from "@artsdiva/api/http";
+
 export interface ClientFormValues {
   name: string;
   email: string;
@@ -11,12 +13,13 @@ interface ClientFormProps {
   values: ClientFormValues;
   isSubmitting: boolean;
   error: string | null;
+  fieldErrors: FieldErrors | null;
   onChange: <K extends keyof ClientFormValues>(field: K, value: ClientFormValues[K]) => void;
   onSubmit: () => void;
   submitLabel: string;
 }
 
-export function ClientForm({ values, isSubmitting, error, onChange, onSubmit, submitLabel }: ClientFormProps) {
+export function ClientForm({ values, isSubmitting, error, fieldErrors, onChange, onSubmit, submitLabel }: ClientFormProps) {
   return (
     <form
       className="flex max-w-md flex-col gap-3"
@@ -28,6 +31,7 @@ export function ClientForm({ values, isSubmitting, error, onChange, onSubmit, su
       <label className="flex flex-col gap-1 text-sm">
         Name
         <input className="border px-2 py-1" value={values.name} onChange={(e) => onChange("name", e.target.value)} required />
+        {fieldErrors?.name && <span className="text-xs text-red-700">{fieldErrors.name[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -38,6 +42,7 @@ export function ClientForm({ values, isSubmitting, error, onChange, onSubmit, su
           value={values.email}
           onChange={(e) => onChange("email", e.target.value)}
         />
+        {fieldErrors?.contactInfo && <span className="text-xs text-red-700">{fieldErrors.contactInfo[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -69,7 +74,7 @@ export function ClientForm({ values, isSubmitting, error, onChange, onSubmit, su
       </label>
 
       {error && (
-        <p role="alert" className="text-sm">
+        <p role="alert" className="text-sm text-red-700">
           {error}
         </p>
       )}

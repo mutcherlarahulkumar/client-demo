@@ -1,3 +1,4 @@
+import type { FieldErrors } from "@artsdiva/api/http";
 import type { ArtworkStatus } from "@artsdiva/types/artwork.types";
 
 export interface ArtworkFormValues {
@@ -21,12 +22,22 @@ interface ArtworkFormProps {
   artists: ArtworkFormArtistOption[];
   isSubmitting: boolean;
   error: string | null;
+  fieldErrors: FieldErrors | null;
   onChange: <K extends keyof ArtworkFormValues>(field: K, value: ArtworkFormValues[K]) => void;
   onSubmit: () => void;
   submitLabel: string;
 }
 
-export function ArtworkForm({ values, artists, isSubmitting, error, onChange, onSubmit, submitLabel }: ArtworkFormProps) {
+export function ArtworkForm({
+  values,
+  artists,
+  isSubmitting,
+  error,
+  fieldErrors,
+  onChange,
+  onSubmit,
+  submitLabel,
+}: ArtworkFormProps) {
   return (
     <form
       className="flex max-w-md flex-col gap-3"
@@ -38,6 +49,7 @@ export function ArtworkForm({ values, artists, isSubmitting, error, onChange, on
       <label className="flex flex-col gap-1 text-sm">
         Title
         <input className="border px-2 py-1" value={values.title} onChange={(e) => onChange("title", e.target.value)} required />
+        {fieldErrors?.title && <span className="text-xs text-red-700">{fieldErrors.title[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -55,11 +67,13 @@ export function ArtworkForm({ values, artists, isSubmitting, error, onChange, on
             </option>
           ))}
         </select>
+        {fieldErrors?.artistId && <span className="text-xs text-red-700">{fieldErrors.artistId[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
         Medium
         <input className="border px-2 py-1" value={values.medium} onChange={(e) => onChange("medium", e.target.value)} required />
+        {fieldErrors?.medium && <span className="text-xs text-red-700">{fieldErrors.medium[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -70,6 +84,7 @@ export function ArtworkForm({ values, artists, isSubmitting, error, onChange, on
           onChange={(e) => onChange("dimensions", e.target.value)}
           required
         />
+        {fieldErrors?.dimensions && <span className="text-xs text-red-700">{fieldErrors.dimensions[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -81,6 +96,7 @@ export function ArtworkForm({ values, artists, isSubmitting, error, onChange, on
           onChange={(e) => onChange("year", e.target.value)}
           required
         />
+        {fieldErrors?.year && <span className="text-xs text-red-700">{fieldErrors.year[0]}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -92,6 +108,9 @@ export function ArtworkForm({ values, artists, isSubmitting, error, onChange, on
           onChange={(e) => onChange("acquisitionDate", e.target.value)}
           required
         />
+        {fieldErrors?.acquisitionDate && (
+          <span className="text-xs text-red-700">{fieldErrors.acquisitionDate[0]}</span>
+        )}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -113,7 +132,7 @@ export function ArtworkForm({ values, artists, isSubmitting, error, onChange, on
       </label>
 
       {error && (
-        <p role="alert" className="text-sm">
+        <p role="alert" className="text-sm text-red-700">
           {error}
         </p>
       )}

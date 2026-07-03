@@ -4,10 +4,12 @@ import { useRouter } from "next/router";
 import { useAuth } from "@artsdiva/hooks/useAuth";
 import { useArtwork } from "@artsdiva/hooks/useArtwork";
 import { useLeases } from "@artsdiva/hooks/useLeases";
+import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { ArtworkStatusBadge } from "@artsdiva/components/ArtworkStatusBadge";
 import { ArtworkImageGallery } from "@artsdiva/components/ArtworkImageGallery";
 import { LeaseStatusBadge } from "@artsdiva/components/LeaseStatusBadge";
 import { LeaseActionButtons } from "@artsdiva/components/LeaseActionButtons";
+import { ConfirmDialog } from "@artsdiva/components/ConfirmDialog";
 import { LeaseFormContainer } from "@artsdiva/containers/LeaseFormContainer";
 import type { ArtworkStatus } from "@artsdiva/types/artwork.types";
 
@@ -18,22 +20,43 @@ interface ArtworkDetailContainerProps {
 export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { artwork, isLoading, error, deleteArtwork, updateStatus, uploadImages, refetch } = useArtwork(artworkId);
   const { isSubmitting: isLeaseActionSubmitting, completeLease, cancelLease } = useLeases({ onMutate: refetch });
   const [showLeaseForm, setShowLeaseForm] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleDelete = (): void => {
-    if (!window.confirm("Delete this artwork?")) return;
+    setIsConfirmOpen(false);
     void deleteArtwork().then((success) => {
-      if (success) void router.push("/artworks");
+      if (success) {
+        showToast("Artwork deleted");
+        void router.push("/artworks");
+      } else {
+        showToast("Failed to delete artwork", "error");
+      }
+    });
+  };
+
+  const handleCompleteLease = (leaseId: string): void => {
+    void completeLease(leaseId).then((success) => {
+      showToast(success ? "Lease completed" : "Failed to complete lease", success ? "success" : "error");
+    });
+  };
+
+  const handleCancelLease = (leaseId: string): void => {
+    void cancelLease(leaseId).then((success) => {
+      showToast(success ? "Lease cancelled" : "Failed to cancel lease", success ? "success" : "error");
     });
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
-    void uploadImages(files);
+    void uploadImages(files).then((success) => {
+      showToast(success ? "Images uploaded" : "Failed to upload images", success ? "success" : "error");
+    });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -91,8 +114,8 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
         {activeLease ? (
           <LeaseActionButtons
             isSubmitting={isLeaseActionSubmitting}
-            onComplete={() => void completeLease(activeLease.id)}
-            onCancel={() => void cancelLease(activeLease.id)}
+            onComplete={() => handleCompleteLease(activeLease.id)}
+            onCancel={() => handleCancelLease(activeLease.id)}
           />
         ) : (
           <>
@@ -118,7 +141,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
         </button>
 
         {user?.role === "ADMIN" && (
-          <button onClick={handleDelete} className="border px-2 py-1 text-sm">
+          <button onClick={() => setIsConfirmOpen(true)} className="border px-2 py-1 text-sm">
             Delete
           </button>
         )}
@@ -130,6 +153,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
             artworkId={artworkId}
             onLeased={() => {
               setShowLeaseForm(false);
+              showToast("Artwork leased");
               void refetch();
             }}
           />
@@ -145,6 +169,15 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
         multiple
         onChange={handleFileChange}
         className="mt-2 text-sm"
+      />
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title="Delete artwork"
+        message={`Delete "${artwork.title}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setIsConfirmOpen(false)}
       />
     </div>
   );

@@ -9,14 +9,20 @@
 const CONFIGURED_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const DEV_FALLBACK_API_BASE_URL = "http://localhost:4000";
 
+// Matches the shape returned by validate()/validateQuery() middleware:
+// zod's `.flatten().fieldErrors`.
+export type FieldErrors = Record<string, string[] | undefined>;
+
 interface ApiErrorBody {
   message?: string;
+  errors?: FieldErrors;
 }
 
 export class ApiError extends Error {
   constructor(
     message: string,
-    public readonly status: number
+    public readonly status: number,
+    public readonly fieldErrors?: FieldErrors
   ) {
     super(message);
     this.name = "ApiError";
@@ -49,11 +55,9 @@ export async function apiRequest<TResponse>(
   const body: unknown = await res.json().catch(() => null);
 
   if (!res.ok) {
-    const message =
-      body && typeof body === "object" && "message" in body
-        ? String((body as ApiErrorBody).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(message, res.status);
+    const errorBody = body && typeof body === "object" ? (body as ApiErrorBody) : null;
+    const message = errorBody?.message ? String(errorBody.message) : `Request failed with status ${res.status}`;
+    throw new ApiError(message, res.status, errorBody?.errors);
   }
 
   return body as TResponse;

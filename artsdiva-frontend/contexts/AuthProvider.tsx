@@ -1,12 +1,13 @@
 import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from "@artsdiva/api/auth.api";
-import { ApiError } from "@artsdiva/api/http";
+import { ApiError, type FieldErrors } from "@artsdiva/api/http";
 import type { AuthenticatedUser, LoginDTO } from "@artsdiva/types/auth.types";
 
 export interface AuthContextValue {
   user: AuthenticatedUser | null;
   isLoading: boolean;
   error: string | null;
+  fieldErrors: FieldErrors | null;
   login: (payload: LoginDTO) => Promise<boolean>;
   logout: () => Promise<void>;
 }
@@ -23,6 +24,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,13 +47,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = useCallback(async (payload: LoginDTO): Promise<boolean> => {
     setError(null);
+    setFieldErrors(null);
     setIsLoading(true);
     try {
       const { user: loggedInUser } = await loginRequest(payload);
       setUser(loggedInUser);
       return true;
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Login failed");
+      if (err instanceof ApiError) {
+        setError(err.message);
+        setFieldErrors(err.fieldErrors ?? null);
+      } else {
+        setError("Login failed");
+      }
       return false;
     } finally {
       setIsLoading(false);
@@ -63,5 +71,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   }, []);
 
-  return <AuthContext.Provider value={{ user, isLoading, error, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, isLoading, error, fieldErrors, login, logout }}>{children}</AuthContext.Provider>
+  );
 }

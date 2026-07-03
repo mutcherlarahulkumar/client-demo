@@ -13,7 +13,7 @@ interface LeaseFormContainerProps {
 // Rendered inline from the Artwork detail page's "Lease this artwork" button.
 export function LeaseFormContainer({ artworkId, onLeased }: LeaseFormContainerProps) {
   const { clients } = useClients();
-  const { isSubmitting, error, createLease } = useLeases({ onMutate: onLeased });
+  const { isSubmitting, error, fieldErrors, createLease } = useLeases({ onMutate: onLeased });
   const [values, setValues] = useState<LeaseFormValues>(emptyValues);
 
   const handleChange = <K extends keyof LeaseFormValues>(field: K, value: LeaseFormValues[K]): void => {
@@ -37,6 +37,7 @@ export function LeaseFormContainer({ artworkId, onLeased }: LeaseFormContainerPr
       clients={clients.map((c) => ({ id: c.id, name: c.name }))}
       isSubmitting={isSubmitting}
       error={error}
+      fieldErrors={fieldErrors}
       onChange={handleChange}
       onSubmit={handleSubmit}
     />

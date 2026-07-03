@@ -3,14 +3,19 @@ import type { AppProps } from "next/app";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { AuthProvider } from "@artsdiva/contexts/AuthProvider";
+import { ToastProvider } from "@artsdiva/contexts/ToastProvider";
 import { useAuth } from "@artsdiva/hooks/useAuth";
 import { GlobalSearchContainer } from "@artsdiva/containers/GlobalSearchContainer";
 
 function Header() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   if (router.pathname === "/login") return null;
+
+  const handleLogout = (): void => {
+    void logout().then(() => void router.push("/login"));
+  };
 
   return (
     <header className="flex items-center gap-4 border-b border-border px-4 py-3 text-sm">
@@ -29,8 +34,12 @@ function Header() {
           <Link href="/clients" className="text-muted hover:text-foreground">
             Clients
           </Link>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-4">
             <GlobalSearchContainer />
+            <span className="text-muted">{user.name}</span>
+            <button onClick={handleLogout} className="text-muted hover:text-foreground">
+              Log out
+            </button>
           </div>
         </>
       )}
@@ -47,8 +56,10 @@ function Header() {
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <AuthProvider>
-      <Header />
-      <Component {...pageProps} />
+      <ToastProvider>
+        <Header />
+        <Component {...pageProps} />
+      </ToastProvider>
     </AuthProvider>
   );
 }

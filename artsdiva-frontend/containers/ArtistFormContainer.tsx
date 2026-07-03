@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { createArtist, updateArtist } from "@artsdiva/api/artist.api";
 import { useArtist } from "@artsdiva/hooks/useArtist";
-import { ApiError } from "@artsdiva/api/http";
+import { ApiError, type FieldErrors } from "@artsdiva/api/http";
+import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { ArtistForm, type ArtistFormValues } from "@artsdiva/components/ArtistForm";
 
 const emptyValues: ArtistFormValues = {
@@ -21,11 +22,13 @@ interface ArtistFormContainerProps {
 
 export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const isEditMode = Boolean(artistId);
   const { artist } = useArtist(artistId);
   const [values, setValues] = useState<ArtistFormValues>(emptyValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
 
   // Adjust form state when the fetched artist arrives, computed during
   // render rather than in an effect (avoids an extra render pass — see
@@ -51,6 +54,7 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
   const handleSubmit = (): void => {
     setIsSubmitting(true);
     setError(null);
+    setFieldErrors(null);
 
     const payload = {
       name: values.name,
@@ -68,10 +72,16 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
 
     void request
       .then((savedArtist) => {
+        showToast(isEditMode ? "Artist updated" : "Artist created");
         void router.push(`/artists/${savedArtist.id}`);
       })
       .catch((err) => {
-        setError(err instanceof ApiError ? err.message : "Failed to save artist");
+        if (err instanceof ApiError) {
+          setError(err.message);
+          setFieldErrors(err.fieldErrors ?? null);
+        } else {
+          setError("Failed to save artist");
+        }
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -85,6 +95,7 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
         values={values}
         isSubmitting={isSubmitting}
         error={error}
+        fieldErrors={fieldErrors}
         onChange={handleChange}
         onSubmit={handleSubmit}
         submitLabel={isEditMode ? "Save changes" : "Create artist"}

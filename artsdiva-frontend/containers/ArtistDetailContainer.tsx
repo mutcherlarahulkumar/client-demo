@@ -3,8 +3,10 @@ import { useRouter } from "next/router";
 import { useAuth } from "@artsdiva/hooks/useAuth";
 import { useArtist } from "@artsdiva/hooks/useArtist";
 import { useDocuments } from "@artsdiva/hooks/useDocuments";
+import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { ArtistDetail } from "@artsdiva/components/ArtistDetail";
 import { DocumentLogSection } from "@artsdiva/components/DocumentLogSection";
+import { ConfirmDialog } from "@artsdiva/components/ConfirmDialog";
 import type { DocumentFileType } from "@artsdiva/types/document.types";
 
 interface ArtistDetailContainerProps {
@@ -14,14 +16,21 @@ interface ArtistDetailContainerProps {
 export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { artist, isLoading, error, deleteArtist } = useArtist(artistId);
   const documents = useDocuments("ARTIST", artistId);
   const [fileType, setFileType] = useState<DocumentFileType>("MOU");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const handleDelete = (): void => {
-    if (!window.confirm("Delete this artist?")) return;
+    setIsConfirmOpen(false);
     void deleteArtist().then((success) => {
-      if (success) void router.push("/artists");
+      if (success) {
+        showToast("Artist deleted");
+        void router.push("/artists");
+      } else {
+        showToast("Failed to delete artist", "error");
+      }
     });
   };
 
@@ -39,7 +48,7 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
         artist={artist}
         canDelete={user?.role === "ADMIN"}
         onEdit={() => void router.push(`/artists/${artistId}/edit`)}
-        onDelete={handleDelete}
+        onDelete={() => setIsConfirmOpen(true)}
         onArtworkClick={(artworkId) => void router.push(`/artworks/${artworkId}`)}
       />
 
@@ -55,6 +64,15 @@ export function ArtistDetailContainer({ artistId }: ArtistDetailContainerProps) 
           onDelete={(id) => void documents.remove(id)}
         />
       </div>
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title="Delete artist"
+        message={`Delete "${artist.name}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </>
   );
 }
