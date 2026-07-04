@@ -95,7 +95,7 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
     : EMPTY;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 860 }}>
+    <Box sx={{ p: 3, maxWidth: 860, mx: "auto" }}>
       <Box sx={{ mb: 3 }}>
         <Link
           href={clientId ? `/clients/${clientId}` : "/clients"}

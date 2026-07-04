@@ -125,7 +125,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 720 }}>
+    <Box sx={{ p: 3, maxWidth: 720, mx: "auto" }}>
       <Box sx={{ mb: 3 }}>
         <Link href={artworkId ? `/artworks/${artworkId}` : "/artworks"} style={{ textDecoration: "none" }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, "&:hover": { textDecoration: "underline" } }}>
