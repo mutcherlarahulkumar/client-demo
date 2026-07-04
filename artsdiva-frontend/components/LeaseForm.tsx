@@ -5,6 +5,7 @@ import FormHelperText from "@mui/material/FormHelperText";
 import FormLabel from "@mui/material/FormLabel";
 import Alert from "@mui/material/Alert";
 import { ClientAutocomplete } from "@artsdiva/components/fields/ClientAutocomplete";
+import { FieldLabel } from "@artsdiva/components/fields/FieldInfo";
 import type { FieldErrors } from "@artsdiva/api/http";
 
 export interface LeaseFormValues {
@@ -70,8 +71,11 @@ export function LeaseForm({
       </Box>
 
       <Box>
-        <TextField
+        <FieldLabel
           label="Terms"
+          info="Conditions of the lease agreement. Example: 6 months, monthly fee of 200, insurance covered by client"
+        />
+        <TextField
           multiline
           minRows={3}
           size="small"

@@ -224,7 +224,7 @@ export function ArtistListContainer() {
                         {artist.contactInfo?.phoneCountryCode &&
                         artist.contactInfo?.phone
                           ? `${artist.contactInfo.phoneCountryCode} ${artist.contactInfo.phone}`
-                          : (artist.contactInfo?.phone ?? "â€”")}
+                          : (artist.contactInfo?.phone ?? "—")}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">

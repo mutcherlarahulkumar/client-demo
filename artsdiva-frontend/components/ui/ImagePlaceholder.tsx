@@ -1,6 +1,7 @@
 ﻿import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 
 interface ImageWithFallbackProps {
   src?: string | null;
@@ -35,7 +36,7 @@ export function ImageWithFallback({
           gap: 1,
         }}
       >
-        <Typography sx={{ fontSize: 36 }}>ðŸ–¼</Typography>
+        <ImageOutlinedIcon sx={{ fontSize: 36, color: "text.disabled" }} />
         <Typography variant="caption" sx={{ color: "text.disabled", textAlign: "center", px: 2 }}>
           No image
         </Typography>

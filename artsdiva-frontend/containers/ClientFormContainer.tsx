@@ -10,7 +10,8 @@ import Divider from "@mui/material/Divider";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Alert from "@mui/material/Alert";
-import Link from "next/link";
+import CircularProgress from "@mui/material/CircularProgress";
+import { BackLink } from "@artsdiva/components/ui/BackLink";
 import {
   useClient,
   useCreateClient,
@@ -78,6 +79,11 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
   const createMutation = useCreateClient();
   const updateMutation = useUpdateClient(clientId ?? "");
 
+  // Name typed into a ClientAutocomplete before clicking "+ Create new client",
+  // plus the page to return to once the client is created.
+  const prefillName = typeof router.query.name === "string" ? router.query.name : "";
+  const redirectTo = typeof router.query.redirectTo === "string" ? router.query.redirectTo : undefined;
+
   if (isEdit && clientLoading) {
     return <SkeletonDetailCard />;
   }
@@ -92,23 +98,15 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
         preferences: client.preferences ?? "",
         notes: client.notes ?? "",
       }
-    : EMPTY;
+    : { ...EMPTY, name: prefillName };
 
   return (
     <Box sx={{ p: 3, maxWidth: 860, mx: "auto" }}>
       <Box sx={{ mb: 3 }}>
-        <Link
+        <BackLink
           href={clientId ? `/clients/${clientId}` : "/clients"}
-          style={{ textDecoration: "none" }}
-        >
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mb: 0.5, cursor: "pointer" }}
-          >
-            {isEdit ? "← Back to Client" : "← Back to Clients"}
-          </Typography>
-        </Link>
+          label={isEdit ? "Back to Client" : "Back to Clients"}
+        />
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
           {isEdit ? `Edit: ${client?.name ?? ""}` : "Add New Client"}
         </Typography>
@@ -135,7 +133,11 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
               ? await updateMutation.mutateAsync(payload)
               : await createMutation.mutateAsync(payload);
             showToast(isEdit ? "Client updated" : "Client created");
-            void router.push(`/clients/${saved.id}`);
+            if (redirectTo) {
+              void router.push(`${redirectTo}?autoClientId=${saved.id}`);
+            } else {
+              void router.push(`/clients/${saved.id}`);
+            }
           } catch (err: unknown) {
             const msg =
               err instanceof Error ? err.message : "Failed to save client";
@@ -154,7 +156,7 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
           status,
         }) => (
           <Form>
-            <Card variant="outlined">
+            <Card elevation={2}>
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   <Box>
@@ -234,7 +236,7 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
                   </Typography>
 
                   <Box>
-                    <FieldLabel label="Preferences" />
+                    <FieldLabel label="Preferences" info="The kind of art this client likes, to help match artworks to them. Example: Contemporary abstract, large formats" />
                     <TextField
                       name="preferences"
                       size="small"
@@ -291,6 +293,7 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
                       type="submit"
                       variant="contained"
                       disabled={isSubmitting}
+                      startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}
                     >
                       {isSubmitting
                         ? "Saving…"

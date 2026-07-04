@@ -60,8 +60,8 @@ export function ArtworkListContainer() {
 
   const formatDimensions = (artwork: Artwork) => {
     const d = artwork.dimensions;
-    if (!d) return "â€”";
-    return `${d.width} Ã— ${d.height} ${d.unit}`;
+    if (!d) return "—";
+    return `${d.width} × ${d.height} ${d.unit}`;
   };
 
   return (
@@ -101,9 +101,9 @@ export function ArtworkListContainer() {
           sx={{ width: 180 }}
         >
           <MenuItem value="">All Statuses</MenuItem>
-          <MenuItem value="IN_COLLECTION">ðŸŸ¢ In Collection</MenuItem>
-          <MenuItem value="ON_LEASE">ðŸ”µ On Lease</MenuItem>
-          <MenuItem value="SOLD">ðŸŸ¡ Sold</MenuItem>
+          <MenuItem value="IN_COLLECTION">In Collection</MenuItem>
+          <MenuItem value="ON_LEASE">On Lease</MenuItem>
+          <MenuItem value="SOLD">Sold</MenuItem>
         </TextField>
       </Box>
 
@@ -159,7 +159,7 @@ export function ArtworkListContainer() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                        {artwork.artist?.name ?? "â€”"}
+                        {artwork.artist?.name ?? "—"}
                       </Typography>
                     </TableCell>
                     <TableCell>

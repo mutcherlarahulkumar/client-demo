@@ -135,19 +135,19 @@ export function ClientListContainer() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                        {client.contactInfo?.email ?? "â€”"}
+                        {client.contactInfo?.email ?? "—"}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ color: "text.secondary" }}>
                         {client.contactInfo?.phoneCountryCode && client.contactInfo?.phone
                           ? `${client.contactInfo.phoneCountryCode} ${client.contactInfo.phone}`
-                          : client.contactInfo?.phone ?? "â€”"}
+                          : client.contactInfo?.phone ?? "—"}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ color: "text.secondary" }} noWrap>
-                        {client.contactInfo?.address ?? "â€”"}
+                        {client.contactInfo?.address ?? "—"}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">

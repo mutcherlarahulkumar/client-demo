@@ -21,7 +21,7 @@ import Alert from "@mui/material/Alert";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import Link from "next/link";
+import { BackLink } from "@artsdiva/components/ui/BackLink";
 import { useArtist, useDeleteArtist } from "@artsdiva/hooks/useArtists";
 import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
 import { SkeletonDetailCard } from "@artsdiva/components/ui/SkeletonTable";
@@ -82,15 +82,9 @@ export function ArtistDetailContainer({
 
   return (
     <Box sx={{ p: 3, maxWidth: 1100 }}>
-      <Link href="/artists" style={{ textDecoration: "none" }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mb: 2, "&:hover": { textDecoration: "underline" } }}
-        >
-          â† Back to Artists
-        </Typography>
-      </Link>
+      <Box sx={{ mb: 2 }}>
+        <BackLink href="/artists" label="Back to Artists" />
+      </Box>
 
       {/* Header card */}
       <Card variant="outlined" sx={{ mb: 2.5 }}>
@@ -229,7 +223,7 @@ export function ArtistDetailContainer({
                   Email
                 </Typography>
                 <Typography variant="body2">
-                  {artist.contactInfo?.email ?? "â€”"}
+                  {artist.contactInfo?.email ?? "—"}
                 </Typography>
               </Box>
               <Box>
@@ -243,7 +237,7 @@ export function ArtistDetailContainer({
                 <Typography variant="body2">
                   {artist.contactInfo?.phone
                     ? `${artist.contactInfo.phoneCountryCode ?? ""} ${artist.contactInfo.phone}`.trim()
-                    : "â€”"}
+                    : "—"}
                 </Typography>
               </Box>
               <Box>
@@ -255,7 +249,7 @@ export function ArtistDetailContainer({
                   Address
                 </Typography>
                 <Typography variant="body2">
-                  {artist.contactInfo?.address ?? "â€”"}
+                  {artist.contactInfo?.address ?? "—"}
                 </Typography>
               </Box>
             </Box>
@@ -305,7 +299,7 @@ export function ArtistDetailContainer({
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                   <Typography variant="body2" color="text.secondary">
-                    Loading artworksâ€¦
+                    Loading artworks…
                   </Typography>
                 </TableCell>
               </TableRow>

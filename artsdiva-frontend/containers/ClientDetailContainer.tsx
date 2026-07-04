@@ -7,7 +7,7 @@ import Avatar from "@mui/material/Avatar";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Alert from "@mui/material/Alert";
-import Link from "next/link";
+import { BackLink } from "@artsdiva/components/ui/BackLink";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -58,11 +58,9 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
     <Box>
       <Box sx={{ p: 3, maxWidth: 1100 }}>
         {/* Breadcrumb */}
-        <Link href="/clients" style={{ textDecoration: "none" }}>
-          <Typography variant="body2" sx={{ color: "text.disabled", mb: 2, cursor: "pointer", "&:hover": { color: "primary.main" } }}>
-            â† Back to Clients
-          </Typography>
-        </Link>
+        <Box sx={{ mb: 2 }}>
+          <BackLink href="/clients" label="Back to Clients" />
+        </Box>
 
         {/* Header card */}
         <Card sx={{ mb: 3 }}>
@@ -129,19 +127,19 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box>
                   <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Email</Typography>
-                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.contactInfo?.email ?? "â€”"}</Typography>
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.contactInfo?.email ?? "—"}</Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Phone</Typography>
                   <Typography variant="body2" sx={{ color: "text.primary" }}>
                     {client.contactInfo?.phoneCountryCode && client.contactInfo?.phone
                       ? `${client.contactInfo.phoneCountryCode} ${client.contactInfo.phone}`
-                      : client.contactInfo?.phone ?? "â€”"}
+                      : client.contactInfo?.phone ?? "—"}
                   </Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Address</Typography>
-                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.contactInfo?.address ?? "â€”"}</Typography>
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.contactInfo?.address ?? "—"}</Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -155,11 +153,11 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box>
                   <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Preferences</Typography>
-                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.preferences ?? "â€”"}</Typography>
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>{client.preferences ?? "—"}</Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Notes</Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>{client.notes ?? "â€”"}</Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>{client.notes ?? "—"}</Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mb: 0.25 }}>Client Since</Typography>

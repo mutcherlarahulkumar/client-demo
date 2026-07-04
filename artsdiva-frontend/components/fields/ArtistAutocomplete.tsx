@@ -61,6 +61,8 @@ export function ArtistAutocomplete({
   const handleCreateNew = () => {
     const params = new URLSearchParams();
     if (redirectOnCreate) params.set("redirectTo", redirectOnCreate);
+    // Carry the typed name over so the create form starts pre-filled with it.
+    if (inputValue.trim()) params.set("name", inputValue.trim());
     window.location.href = `/artists/new?${params.toString()}`;
   };
 
@@ -71,7 +73,12 @@ export function ArtistAutocomplete({
       value={selectedArtist}
       inputValue={inputValue}
       onInputChange={(_, val, reason) => {
-        if (reason !== "reset") setInputValue(val);
+        // "reset" fires when MUI syncs the input to the selected option's
+        // label (on select / prefill). Accept it so the chosen artist's name
+        // actually appears in the field; only ignore resets to empty while a
+        // value is selected (prevents flicker during option reloads).
+        if (reason === "reset" && val === "" && value) return;
+        setInputValue(val);
       }}
       onChange={(_, opt) => {
         if (!opt) { onChange(""); return; }

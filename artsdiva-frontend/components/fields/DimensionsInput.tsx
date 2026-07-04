@@ -33,7 +33,7 @@ export function DimensionsInput({ value, onChange, errors, disabled }: Dimension
           sx={{ flex: 1 }}
         />
         <Box sx={{ pt: 1.2, color: "text.disabled", flexShrink: 0 }}>
-          <Typography>Ã—</Typography>
+          <Typography>×</Typography>
         </Box>
         <TextField
           size="small"
@@ -62,7 +62,7 @@ export function DimensionsInput({ value, onChange, errors, disabled }: Dimension
       </Box>
       {value.width && value.height && (
         <Typography variant="caption" sx={{ color: "text.disabled", mt: 0.5, display: "block" }}>
-          {value.width} Ã— {value.height} {value.unit ?? "cm"}
+          {value.width} × {value.height} {value.unit ?? "cm"}
         </Typography>
       )}
     </Box>

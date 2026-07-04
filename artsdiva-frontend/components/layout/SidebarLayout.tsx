@@ -21,6 +21,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "@artsdiva/hooks/useAuth";
+import { GlobalSearch } from "@artsdiva/components/GlobalSearch";
 
 const DRAWER_WIDTH = 220;
 
@@ -127,9 +128,12 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="subtitle1" sx={{ flexGrow: 1, fontWeight: 700 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             ArtsDiva
           </Typography>
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", px: 2 }}>
+            <GlobalSearch />
+          </Box>
           {user && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="body2" color="text.secondary" sx={{ display: { xs: "none", sm: "block" } }}>

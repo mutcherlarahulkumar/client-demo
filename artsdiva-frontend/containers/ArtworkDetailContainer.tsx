@@ -11,7 +11,7 @@ import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import Chip from "@mui/material/Chip";
 import Collapse from "@mui/material/Collapse";
-import Link from "next/link";
+import { BackLink } from "@artsdiva/components/ui/BackLink";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useArtwork, useDeleteArtwork, useUpdateArtworkStatus, useUploadArtworkImages } from "@artsdiva/hooks/useArtworks";
@@ -82,8 +82,8 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
   }
 
   const dims = artwork.dimensions
-    ? `${artwork.dimensions.width} Ã— ${artwork.dimensions.height} ${artwork.dimensions.unit}`
-    : "â€”";
+    ? `${artwork.dimensions.width} × ${artwork.dimensions.height} ${artwork.dimensions.unit}`
+    : "—";
 
   const images = artwork.images ?? [];
 
@@ -91,11 +91,9 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
     <Box>
       <Box sx={{ p: 3, maxWidth: 1100 }}>
         {/* Breadcrumb */}
-        <Link href="/artworks" style={{ textDecoration: "none" }}>
-          <Typography variant="body2" sx={{ color: "text.disabled", mb: 2, cursor: "pointer", "&:hover": { color: "primary.main" } }}>
-            â† Back to Artworks
-          </Typography>
-        </Link>
+        <Box sx={{ mb: 2 }}>
+          <BackLink href="/artworks" label="Back to Artworks" />
+        </Box>
 
         {/* Header */}
         <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: 3 }}>
@@ -181,7 +179,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
                   sx={{ ml: "auto", fontSize: "0.75rem" }}
                   disabled={uploadMutation.isPending}
                 >
-                  {uploadMutation.isPending ? "Uploadingâ€¦" : "+ Upload"}
+                  {uploadMutation.isPending ? "Uploading…" : "+ Upload"}
                   <input type="file" accept="image/*" multiple hidden onChange={(e) => void handleImageUpload(e)} />
                 </Button>
               </Box>
@@ -234,9 +232,9 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
                   disabled={statusMutation.isPending}
                   sx={{ mt: 1 }}
                 >
-                  <MenuItem value="IN_COLLECTION">ðŸŸ¢ In Collection</MenuItem>
-                  <MenuItem value="ON_LEASE">ðŸ”µ On Lease</MenuItem>
-                  <MenuItem value="SOLD">ðŸŸ¡ Sold</MenuItem>
+                  <MenuItem value="IN_COLLECTION">In Collection</MenuItem>
+                  <MenuItem value="ON_LEASE">On Lease</MenuItem>
+                  <MenuItem value="SOLD">Sold</MenuItem>
                 </TextField>
               </CardContent>
             </Card>

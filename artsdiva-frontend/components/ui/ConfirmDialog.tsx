@@ -8,6 +8,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -62,7 +63,7 @@ export function ConfirmDialog({
                   fontSize: 16,
                 }}
               >
-                ðŸ—‘
+                <DeleteOutlineIcon fontSize="small" sx={{ color: "error.main" }} />
               </Box>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {title}
@@ -84,7 +85,7 @@ export function ConfirmDialog({
               disabled={loading}
               sx={{ backgroundColor: "#DC2626", "&:hover": { backgroundColor: "#B91C1C" } }}
             >
-              {loading ? "Deletingâ€¦" : confirmLabel}
+              {loading ? "Deleting…" : confirmLabel}
             </Button>
           </DialogActions>
         </Dialog>

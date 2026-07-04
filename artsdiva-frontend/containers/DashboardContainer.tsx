@@ -76,7 +76,7 @@ export function DashboardContainer() {
 
       {error && (
         <Alert severity="warning" sx={{ mb: 3 }}>
-          Could not load stats â€” {error instanceof Error ? error.message : "please try again"}
+          Could not load stats — {error instanceof Error ? error.message : "please try again"}
         </Alert>
       )}
 
@@ -137,7 +137,7 @@ export function DashboardContainer() {
       <Grid container spacing={2}>
         {[
           { icon: PaletteIcon, title: "Artists",  desc: "Manage artist profiles, commission terms, and MOU agreements.", viewHref: "/artists", addHref: "/artists/new" },
-          { icon: ImageIcon,   title: "Artworks", desc: "Track the full collection â€” status, dimensions, acquisition dates, and images.", viewHref: "/artworks", addHref: "/artworks/new" },
+          { icon: ImageIcon,   title: "Artworks", desc: "Track the full collection — status, dimensions, acquisition dates, and images.", viewHref: "/artworks", addHref: "/artworks/new" },
           { icon: PeopleIcon,  title: "Clients",  desc: "Manage client relationships, contact info, and preferences.", viewHref: "/clients", addHref: "/clients/new" },
         ].map((mod) => {
           const IconCmp = mod.icon;

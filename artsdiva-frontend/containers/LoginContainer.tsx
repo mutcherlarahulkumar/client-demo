@@ -52,7 +52,7 @@ export function LoginContainer() {
         px: 2,
       }}
     >
-      <Card variant="outlined" sx={{ width: "100%", maxWidth: 400 }}>
+      <Card elevation={3} sx={{ width: "100%", maxWidth: 400 }}>
         <CardContent sx={{ p: 4 }}>
           <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
             ArtsDiva IMS

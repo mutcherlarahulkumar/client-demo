@@ -57,6 +57,7 @@ export function ClientAutocomplete({
   const handleCreateNew = () => {
     const params = new URLSearchParams();
     if (redirectOnCreate) params.set("redirectTo", redirectOnCreate);
+    if (inputValue.trim()) params.set("name", inputValue.trim());
     window.location.href = `/clients/new?${params.toString()}`;
   };
 
@@ -67,7 +68,8 @@ export function ClientAutocomplete({
       value={selectedClient}
       inputValue={inputValue}
       onInputChange={(_, val, reason) => {
-        if (reason !== "reset") setInputValue(val);
+        if (reason === "reset" && val === "" && value) return;
+        setInputValue(val);
       }}
       onChange={(_, opt) => {
         if (!opt) { onChange(""); return; }

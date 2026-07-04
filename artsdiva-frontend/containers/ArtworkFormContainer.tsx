@@ -11,7 +11,8 @@ import Divider from "@mui/material/Divider";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Alert from "@mui/material/Alert";
-import Link from "next/link";
+import CircularProgress from "@mui/material/CircularProgress";
+import { BackLink } from "@artsdiva/components/ui/BackLink";
 import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useArtwork, useCreateArtwork, useUpdateArtwork } from "@artsdiva/hooks/useArtworks";
@@ -127,11 +128,10 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
   return (
     <Box sx={{ p: 3, maxWidth: 720, mx: "auto" }}>
       <Box sx={{ mb: 3 }}>
-        <Link href={artworkId ? `/artworks/${artworkId}` : "/artworks"} style={{ textDecoration: "none" }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, "&:hover": { textDecoration: "underline" } }}>
-            â† {isEdit ? "Back to Artwork" : "Back to Artworks"}
-          </Typography>
-        </Link>
+        <BackLink
+          href={artworkId ? `/artworks/${artworkId}` : "/artworks"}
+          label={isEdit ? "Back to Artwork" : "Back to Artworks"}
+        />
         <Typography variant="h5">{isEdit ? `Edit: ${artwork?.title ?? ""}` : "Add New Artwork"}</Typography>
       </Box>
 
@@ -149,7 +149,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
       >
         {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isSubmitting, status }) => (
           <Form>
-            <Card variant="outlined">
+            <Card elevation={2}>
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {/* Title */}
@@ -182,7 +182,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
                   {/* Medium + Year */}
                   <Box sx={{ display: "flex", gap: 2 }}>
                     <Box sx={{ flex: 1 }}>
-                      <FieldLabel label="Medium" required />
+                      <FieldLabel label="Medium" required info="The materials and surface used. Example: Oil on canvas, Bronze, Watercolour on paper" />
                       <TextField
                         name="medium"
                         size="small"
@@ -207,7 +207,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
 
                   {/* Dimensions */}
                   <Box>
-                    <FieldLabel label="Dimensions" required />
+                    <FieldLabel label="Dimensions" required info="Physical size of the artwork as width by height. Example: 60 x 90 cm" />
                     <DimensionsInput
                       value={values.dimensions}
                       onChange={(val) => void setFieldValue("dimensions", val)}
@@ -224,7 +224,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
                   {/* Acquisition Date + Status */}
                   <Box sx={{ display: "flex", gap: 2 }}>
                     <Box sx={{ flex: 1 }}>
-                      <FieldLabel label="Acquisition Date" required />
+                      <FieldLabel label="Acquisition Date" required info="The date the gallery received or purchased this artwork, not the date it was painted." />
                       <DatePicker
                         value={values.acquisitionDate ? dayjs(values.acquisitionDate) : null}
                         onChange={(val) => void setFieldValue("acquisitionDate", val ? val.format("YYYY-MM-DD") : "")}
@@ -239,7 +239,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
                       />
                     </Box>
                     <Box sx={{ flex: 1 }}>
-                      <FieldLabel label="Status" required />
+                      <FieldLabel label="Status" required info="In Collection = available at the gallery. On Lease = currently rented to a client. Sold = no longer available." />
                       <TextField
                         name="status"
                         size="small"
@@ -288,8 +288,8 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
               <Button variant="outlined" onClick={() => void router.back()} disabled={isSubmitting} sx={{ minWidth: 120 }}>
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
-                {isSubmitting ? "Savingâ€¦" : isEdit ? "Save Changes" : "Create Artwork"}
+              <Button type="submit" variant="contained" disabled={isSubmitting} startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}>
+                {isSubmitting ? "Saving…" : isEdit ? "Save Changes" : "Create Artwork"}
               </Button>
             </Box>
           </Form>
