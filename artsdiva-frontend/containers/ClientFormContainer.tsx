@@ -276,7 +276,7 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
                   <Box
                     sx={{
                       display: "flex",
-                      justifyContent: "flex-end",
+                      justifyContent: "center",
                       gap: 1.5,
                     }}
                   >
@@ -308,3 +308,5 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
     </Box>
   );
 }
+
+

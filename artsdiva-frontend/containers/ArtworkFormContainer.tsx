@@ -284,8 +284,8 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
               </Alert>
             )}
 
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, mt: 2.5 }}>
-              <Button variant="outlined" onClick={() => void router.back()} disabled={isSubmitting}>
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5, mt: 2.5 }}>
+              <Button variant="outlined" onClick={() => void router.back()} disabled={isSubmitting} sx={{ minWidth: 120 }}>
                 Cancel
               </Button>
               <Button type="submit" variant="contained" disabled={isSubmitting}>
@@ -298,4 +298,6 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
     </Box>
   );
 }
+
+
 

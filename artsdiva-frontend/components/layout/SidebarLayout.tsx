@@ -1,22 +1,27 @@
-import React from "react";
+﻿import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Avatar from "@mui/material/Avatar";
-import Tooltip from "@mui/material/Tooltip";
+import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
-import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import Tooltip from "@mui/material/Tooltip";
+import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PaletteIcon from "@mui/icons-material/Palette";
 import ImageIcon from "@mui/icons-material/Image";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "@artsdiva/hooks/useAuth";
+
+const DRAWER_WIDTH = 220;
 
 interface NavItem {
   label: string;
@@ -25,64 +30,61 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/",         icon: <DashboardIcon fontSize="small" /> },
-  { label: "Artists",   href: "/artists",  icon: <PaletteIcon fontSize="small" /> },
-  { label: "Artworks",  href: "/artworks", icon: <ImageIcon fontSize="small" /> },
-  { label: "Clients",   href: "/clients",  icon: <PeopleIcon fontSize="small" /> },
+  { label: "Dashboard", href: "/",         icon: <DashboardIcon /> },
+  { label: "Artists",   href: "/artists",  icon: <PaletteIcon /> },
+  { label: "Artworks",  href: "/artworks", icon: <ImageIcon /> },
+  { label: "Clients",   href: "/clients",  icon: <PeopleIcon /> },
 ];
 
-function NavLink({ item, active }: { item: NavItem; active: boolean }) {
+function DrawerContent({ activeHref }: { activeHref: string }) {
   return (
-    <Link href={item.href} style={{ textDecoration: "none", display: "block" }}>
-      <ListItemButton
-        selected={active}
-        sx={{
-          borderRadius: 1.5,
-          mx: 0.5,
-          px: 1.5,
-          py: 1,
-          mb: 0.25,
-          color: active ? "#A5B4FC" : "#94A3B8",
-          "&.Mui-selected": {
-            backgroundColor: "rgba(99,102,241,0.15)",
-            border: "1px solid rgba(99,102,241,0.25)",
-            color: "#A5B4FC",
-            "&:hover": { backgroundColor: "rgba(99,102,241,0.2)" },
-          },
-          "&:hover": {
-            backgroundColor: "rgba(255,255,255,0.06)",
-            color: "#CBD5E1",
-          },
-          transition: "all 0.15s ease",
-        }}
-      >
-        <ListItemIcon sx={{ minWidth: 34, color: "inherit" }}>
-          {item.icon}
-        </ListItemIcon>
-        <ListItemText
-          primary={item.label}
-          slotProps={{
-            primary: {
-              sx: {
-                fontSize: "0.875rem",
-                fontWeight: active ? 600 : 400,
-                color: "inherit",
-                letterSpacing: "0.01em",
-              },
-            },
-          }}
-        />
-        {active && (
-          <Box sx={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#6366F1", flexShrink: 0 }} />
-        )}
-      </ListItemButton>
-    </Link>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <Toolbar />
+      <Divider />
+      <List sx={{ flex: 1, pt: 1 }}>
+        {NAV_ITEMS.map((item) => {
+          const active = activeHref === item.href;
+          return (
+            <Link key={item.href} href={item.href} style={{ textDecoration: "none", color: "inherit" }}>
+              <ListItemButton
+                selected={active}
+                sx={{
+                  mx: 1,
+                  mb: 0.5,
+                  borderRadius: 1,
+                  "&.Mui-selected": {
+                    backgroundColor: "primary.main",
+                    color: "#fff",
+                    "& .MuiListItemIcon-root": { color: "#fff" },
+                    "&:hover": { backgroundColor: "primary.main" },
+                  },
+                  "&:hover": {
+                    backgroundColor: active ? "primary.main" : "action.hover",
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, color: active ? "inherit" : "text.secondary" }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.label}
+                  slotProps={{
+                    primary: { sx: { fontSize: "0.875rem", fontWeight: active ? 600 : 400 } },
+                  }}
+                />
+              </ListItemButton>
+            </Link>
+          );
+        })}
+      </List>
+    </Box>
   );
 }
 
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const [open, setOpen] = useState(false);
 
   const handleLogout = () => {
     void logout().then(() => void router.push("/login"));
@@ -91,110 +93,62 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const activeHref = "/" + router.pathname.split("/")[1];
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "background.default" }}>
-      {/* Sidebar */}
-      <Box
-        sx={{
-          width: 220,
-          flexShrink: 0,
-          backgroundColor: "#0F172A",
-          display: "flex",
-          flexDirection: "column",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          height: "100vh",
-          zIndex: 100,
-        }}
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      {/* Top AppBar */}
+      <AppBar
+        position="fixed"
+        color="default"
+        elevation={0}
+        sx={{ borderBottom: "1px solid", borderColor: "divider", backgroundColor: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
-        {/* Logo */}
-        <Box sx={{ px: 2, pt: 2.5, pb: 2 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              px: 1.5,
-              py: 1.25,
-              borderRadius: 2,
-              backgroundColor: "#1E293B",
-            }}
+        <Toolbar variant="dense" sx={{ gap: 1 }}>
+          <IconButton
+            edge="start"
+            onClick={() => setOpen((prev) => !prev)}
+            size="small"
+            aria-label="toggle navigation"
           >
-            <Avatar
-              sx={{
-                width: 28,
-                height: 28,
-                backgroundColor: "primary.main",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-              }}
-            >
-              A
-            </Avatar>
-            <Box>
-              <Typography sx={{ fontWeight: 700, color: "#FFFFFF", fontSize: "0.875rem", lineHeight: 1.2 }}>
-                ArtsDiva
-              </Typography>
-              <Typography sx={{ color: "#64748B", fontSize: "0.7rem" }}>
-                IMS
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        <Divider sx={{ borderColor: "#1E293B", mx: 2 }} />
-
-        {/* Nav */}
-        <List sx={{ flex: 1, pt: 1.5, px: 0.5 }} disablePadding>
-          {NAV_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} active={activeHref === item.href} />
-          ))}
-        </List>
-
-        <Divider sx={{ borderColor: "#1E293B", mx: 2 }} />
-
-        {/* User footer */}
-        {user && (
-          <Box sx={{ px: 2, py: 1.75, display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Avatar
-              sx={{
-                width: 32,
-                height: 32,
-                backgroundColor: "#3730A3",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-              }}
-            >
-              {user.name.slice(0, 2).toUpperCase()}
-            </Avatar>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography noWrap sx={{ color: "#CBD5E1", fontSize: "0.8rem", fontWeight: 500 }}>
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="subtitle1" fontWeight={700} sx={{ flexGrow: 1 }}>
+            ArtsDiva
+          </Typography>
+          {user && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ display: { xs: "none", sm: "block" } }}>
                 {user.name}
               </Typography>
-              <Typography sx={{ color: "#475569", fontSize: "0.7rem" }}>
-                {user.role}
-              </Typography>
+              <Tooltip title="Log out">
+                <IconButton size="small" onClick={handleLogout} aria-label="logout">
+                  <LogoutIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </Box>
-            <Tooltip title="Log out" placement="top">
-              <IconButton
-                onClick={handleLogout}
-                size="small"
-                sx={{ color: "#64748B", "&:hover": { color: "#F87171", backgroundColor: "transparent" } }}
-              >
-                <LogoutIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
-      </Box>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      {/* Collapsible Drawer */}
+      <Drawer
+        variant="temporary"
+        open={open}
+        onClose={() => setOpen(false)}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          "& .MuiDrawer-paper": { width: DRAWER_WIDTH, boxSizing: "border-box" },
+        }}
+      >
+        <DrawerContent activeHref={activeHref} />
+      </Drawer>
 
       {/* Main content */}
       <Box
+        component="main"
         sx={{
-          flex: 1,
-          ml: "220px",
+          flexGrow: 1,
           minHeight: "100vh",
           backgroundColor: "background.default",
+          pt: "48px",
         }}
       >
         {children}

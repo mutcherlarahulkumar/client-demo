@@ -1,15 +1,28 @@
-import { createTheme } from "@mui/material/styles";
+﻿import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
   typography: {
     fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
-  shape: { borderRadius: 8 },
+  shape: { borderRadius: 6 },
   components: {
     MuiButton: {
+      defaultProps: { disableRipple: true, disableElevation: true },
       styleOverrides: {
-        root: { textTransform: "none", fontWeight: 600 },
+        root: {
+          textTransform: "none",
+          fontWeight: 600,
+          // No color shift on hover or active — keep the same background
+          "&:hover": { filter: "none" },
+          "&:active": { filter: "none" },
+        },
       },
+    },
+    MuiIconButton: {
+      defaultProps: { disableRipple: true },
+    },
+    MuiListItemButton: {
+      defaultProps: { disableRipple: true },
     },
     MuiTableHead: {
       styleOverrides: {
@@ -35,6 +48,11 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: { boxShadow: "none" },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: { borderRight: "1px solid #e0e0e0" },
       },
     },
   },
