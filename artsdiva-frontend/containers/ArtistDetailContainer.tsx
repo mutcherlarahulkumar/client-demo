@@ -96,7 +96,7 @@ export function ArtistDetailContainer({
                 height: 56,
                 fontSize: "1.25rem",
                 fontWeight: 700,
-                bgcolor: "primary.main",
+                bgcolor: "rgba(25, 118, 210, 0.12)", color: "primary.main",
               }}
             >
               {initials(artist.name)}

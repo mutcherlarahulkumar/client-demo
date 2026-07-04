@@ -109,9 +109,14 @@ export function ClientListContainer() {
             ) : clients.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
-                  <Typography sx={{ color: "text.disabled" }}>
-                    {search ? `No clients found for "${search}"` : "No clients yet. Add one to get started."}
+                  <Typography sx={{ color: "text.disabled", mb: search ? 0 : 2 }}>
+                    {search ? `No clients found for "${search}"` : "No clients yet."}
                   </Typography>
+                  {!search && (
+                    <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => void router.push("/clients/new")}>
+                      Add your first client
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ) : (
@@ -125,7 +130,7 @@ export function ClientListContainer() {
                   >
                     <TableCell>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                        <Avatar sx={{ width: 36, height: 36, bgcolor: "primary.main", fontSize: "0.75rem", fontWeight: 700 }}>
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: "rgba(25, 118, 210, 0.12)", color: "primary.main", fontSize: "0.75rem", fontWeight: 700 }}>
                           {initials(client.name)}
                         </Avatar>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>

@@ -156,11 +156,16 @@ export function ArtistListContainer() {
             ) : artists.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
-                  <Typography sx={{ color: "text.disabled" }}>
+                  <Typography sx={{ color: "text.disabled", mb: search ? 0 : 2 }}>
                     {search
                       ? `No artists found for "${search}"`
-                      : "No artists yet. Add one to get started."}
+                      : "No artists yet."}
                   </Typography>
+                  {!search && (
+                    <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => void router.push("/artists/new")}>
+                      Add your first artist
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ) : (
@@ -180,7 +185,7 @@ export function ArtistListContainer() {
                           sx={{
                             width: 36,
                             height: 36,
-                            bgcolor: "primary.main",
+                            bgcolor: "rgba(25, 118, 210, 0.12)", color: "primary.main",
                             fontSize: "0.75rem",
                             fontWeight: 700,
                           }}

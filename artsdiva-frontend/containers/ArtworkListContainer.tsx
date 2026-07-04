@@ -129,9 +129,14 @@ export function ArtworkListContainer() {
             ) : artworks.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
-                  <Typography sx={{ color: "text.disabled" }}>
-                    {search || status ? "No artworks match your filters." : "No artworks yet. Add one to get started."}
+                  <Typography sx={{ color: "text.disabled", mb: search || status ? 0 : 2 }}>
+                    {search || status ? "No artworks match your filters." : "No artworks yet."}
                   </Typography>
+                  {!search && !status && (
+                    <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => void router.push("/artworks/new")}>
+                      Add your first artwork
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ) : (

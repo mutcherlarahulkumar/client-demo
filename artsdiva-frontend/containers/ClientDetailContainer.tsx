@@ -69,7 +69,7 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
                 sx={{
                   width: 64,
                   height: 64,
-                  bgcolor: "primary.main",
+                  bgcolor: "rgba(25, 118, 210, 0.12)", color: "primary.main",
                   fontSize: "1.5rem",
                   fontWeight: 700,
                   flexShrink: 0,
