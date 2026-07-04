@@ -1,6 +1,7 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import CircularProgress from "@mui/material/CircularProgress";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -83,12 +84,28 @@ function DrawerContent({ activeHref }: { activeHref: string }) {
 
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const [open, setOpen] = useState(false);
+
+  // Redirect to login when session has expired or was never established.
+  useEffect(() => {
+    if (!isLoading && !user) {
+      void router.replace("/login");
+    }
+  }, [isLoading, user, router]);
 
   const handleLogout = () => {
     void logout().then(() => void router.push("/login"));
   };
+
+  // While checking session or redirecting — show a blank screen, not the full layout.
+  if (isLoading || !user) {
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+        <CircularProgress size={32} />
+      </Box>
+    );
+  }
 
   const activeHref = "/" + router.pathname.split("/")[1];
 

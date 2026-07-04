@@ -12,23 +12,32 @@ import searchRoutes from "./routes/search.routes";
 import documentRoutes from "./routes/document.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 
-// ---------------------------------------------------------------------------
-// Phase 1 scaffold bootstrap.
-// This is infrastructure only (health checks + middleware wiring). The real
-// route -> controller -> service layers are added once the data model is
-// approved. See README "Planned structure".
-// ---------------------------------------------------------------------------
-
 const app = express();
 const PORT = Number(process.env.PORT ?? 4000);
 
-// Allow any origin. Access-Control-Allow-Origin: "*" is disallowed by the
-// CORS spec when credentials are involved, so "allow all" with cookies
-// means reflecting back whatever Origin header the request actually sent,
-// per request, rather than a literal wildcard. Trade-off: any website can
-// make credentialed requests to this API on behalf of a logged-in user's
-// browser -- accepted for this internal staff tool per current direction;
-// revisit with a real allowlist if this ever needs to be public-facing.
+// ---------------------------------------------------------------------------
+// Request logger — logs every request with method, path, status, and timing.
+// Runs before routes so all responses are captured.
+// ---------------------------------------------------------------------------
+app.use((req: Request, res: Response, next: NextFunction): void => {
+  const start = Date.now();
+  const { method, url } = req;
+
+  res.on("finish", () => {
+    const ms = Date.now() - start;
+    const level = res.statusCode >= 500 ? "ERROR" : res.statusCode >= 400 ? "WARN" : "INFO";
+    // eslint-disable-next-line no-console
+    console.log(
+      `[${new Date().toISOString()}] ${level} ${method} ${url} → ${res.statusCode} (${ms}ms)`
+    );
+  });
+
+  next();
+});
+
+// ---------------------------------------------------------------------------
+// CORS — reflect origin header so credentialed cross-site requests work.
+// ---------------------------------------------------------------------------
 app.use(
   cors({
     origin: true,
@@ -38,23 +47,25 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// Liveness — process is up.
+// ---------------------------------------------------------------------------
+// Health endpoints
+// ---------------------------------------------------------------------------
 app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
 
-// Readiness — database is reachable.
 app.get("/health/db", async (_req: Request, res: Response) => {
   try {
     await prisma.$runCommandRaw({ ping: 1 });
     res.json({ status: "ok", db: "up" });
   } catch (err) {
-    res
-      .status(503)
-      .json({ status: "error", db: "down", message: (err as Error).message });
+    res.status(503).json({ status: "error", db: "down", message: (err as Error).message });
   }
 });
 
+// ---------------------------------------------------------------------------
+// Routes
+// ---------------------------------------------------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/artists", artistRoutes);
 app.use("/api/artworks", artworkRoutes);
@@ -64,15 +75,24 @@ app.use("/api/search", searchRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-// Central error handler — catches anything forwarded via next(err),
-// including rejected promises from asyncHandler-wrapped controllers.
-app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+// ---------------------------------------------------------------------------
+// Central error handler
+// ---------------------------------------------------------------------------
+app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
+  const message = err instanceof Error ? err.message : String(err);
+  const stack = err instanceof Error ? err.stack : undefined;
+
   // eslint-disable-next-line no-console
-  console.error(err);
+  console.error(
+    `[${new Date().toISOString()}] UNCAUGHT ${req.method} ${req.url}\n` +
+    `  Error: ${message}\n` +
+    (stack ? `  Stack: ${stack}` : "")
+  );
+
   res.status(500).json({ message: "Internal server error" });
 });
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`ArtsDiva API listening on http://localhost:${PORT}`);
+  console.log(`[${new Date().toISOString()}] ArtsDiva API listening on port ${PORT}`);
 });
