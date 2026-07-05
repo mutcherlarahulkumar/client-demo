@@ -75,45 +75,44 @@ export function GlobalSearch() {
           <Typography variant="body2">{option.label}</Typography>
         </Box>
       )}
-      renderInput={(params) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const p = params as any;
-        return (
-          <TextField
-            {...params}
-            placeholder="Search artists, artworks, clients…"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "#F1F3F6",
-                borderRadius: 2,
-                "& fieldset": { border: "none" },
-                "&:hover": { backgroundColor: "#EAEDF1" },
-                "&.Mui-focused": {
-                  backgroundColor: "#fff",
-                  boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.25)",
-                },
+      renderInput={(params) => (
+        // MUI v9: Autocomplete's input wiring lives in params.slotProps
+        // (input/htmlInput/inputLabel) — it MUST be spread through, otherwise
+        // the field renders but typing never reaches the Autocomplete.
+        <TextField
+          {...params}
+          placeholder="Search artists, artworks, clients…"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "#F1F3F6",
+              borderRadius: 2,
+              "& fieldset": { border: "none" },
+              "&:hover": { backgroundColor: "#EAEDF1" },
+              "&.Mui-focused": {
+                backgroundColor: "#fff",
+                boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.25)",
               },
-            }}
-            slotProps={{
-              input: {
-                ...p.InputProps,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" color="action" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <>
-                    {isFetching && <CircularProgress size={14} />}
-                    {p.InputProps?.endAdornment}
-                  </>
-                ),
-              },
-              htmlInput: p.inputProps,
-            }}
-          />
-        );
-      }}
+            },
+          }}
+          slotProps={{
+            ...params.slotProps,
+            input: {
+              ...params.slotProps.input,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" color="action" />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <>
+                  {isFetching && <CircularProgress size={14} />}
+                  {params.slotProps.input.endAdornment}
+                </>
+              ),
+            },
+          }}
+        />
+      )}
     />
   );
 }
