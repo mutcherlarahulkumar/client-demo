@@ -345,7 +345,12 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
             <Collapse in={leaseOpen} unmountOnExit>
               <LeaseFormContainer
                 artworkId={artworkId}
-                onLeased={() => { setLeaseOpen(false); showToast("Artwork leased successfully"); }}
+                onLeased={() => {
+                  setLeaseOpen(false);
+                  showToast("Artwork leased successfully");
+                  // Refetch so the page immediately reflects ON_LEASE + the active lease.
+                  void queryClient.invalidateQueries({ queryKey: [ARTWORKS_KEY] });
+                }}
                 onCancel={() => setLeaseOpen(false)}
               />
             </Collapse>
