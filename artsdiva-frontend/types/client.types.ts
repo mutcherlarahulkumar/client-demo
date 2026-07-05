@@ -25,8 +25,12 @@ export interface CreateClientDTO {
 
 export type UpdateClientDTO = Partial<CreateClientDTO>;
 
+export type ClientSortField = "name" | "createdAt";
+
 export interface ListClientsParams {
   search?: string;
   page?: number;
   limit?: number;
+  sortBy?: ClientSortField;
+  sortOrder?: "asc" | "desc";
 }

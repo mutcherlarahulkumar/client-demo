@@ -46,6 +46,11 @@ export async function deleteArtwork(id: string): Promise<void> {
   await apiRequest<void>(`/api/artworks/${id}`, { method: "DELETE" });
 }
 
+export async function exportArtworks(params?: ListArtworksParams): Promise<Artwork[]> {
+  const { data } = await apiRequest<{ data: Artwork[] }>(`/api/artworks/export${buildQueryString(params)}`);
+  return data;
+}
+
 export async function uploadArtworkImages(id: string, files: File[]): Promise<Artwork> {
   const formData = new FormData();
   files.forEach((file) => formData.append("images", file));

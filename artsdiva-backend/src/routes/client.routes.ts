@@ -6,6 +6,7 @@ import { createClientSchema, listClientsQuerySchema, updateClientSchema } from "
 import {
   createClientHandler,
   deleteClientHandler,
+  exportClientsHandler,
   getClientHandler,
   listClientsHandler,
   updateClientHandler,
@@ -17,6 +18,8 @@ const router: Router = Router();
 router.use(authenticate);
 
 router.get("/", validateQuery(listClientsQuerySchema), asyncHandler(listClientsHandler));
+// Must precede /:id — otherwise Express would treat "export" as an id.
+router.get("/export", validateQuery(listClientsQuerySchema), asyncHandler(exportClientsHandler));
 router.get("/:id", asyncHandler(getClientHandler));
 router.post("/", validate(createClientSchema), asyncHandler(createClientHandler));
 router.put("/:id", validate(updateClientSchema), asyncHandler(updateClientHandler));

@@ -20,6 +20,12 @@ export async function listClientsHandler(_req: Request, res: Response): Promise<
   res.status(200).json(result);
 }
 
+export async function exportClientsHandler(_req: Request, res: Response): Promise<void> {
+  const query = res.locals.query as ListClientsQuery;
+  const data = await clientService.exportClients(query);
+  res.status(200).json({ data });
+}
+
 export async function getClientHandler(req: Request, res: Response): Promise<void> {
   try {
     const client = await clientService.getClientById(req.params.id as string);

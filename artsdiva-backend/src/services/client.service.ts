@@ -9,26 +9,39 @@ export class ClientHasLeasesError extends Error {}
 
 const active = { isDeleted: false };
 
-export async function listClients(query: ListClientsQuery): Promise<PaginatedResponse<Client>> {
-  const page = query.page ?? 1;
-  const limit = query.limit ?? 20;
-
-  const where: Prisma.ClientWhereInput = {
+function buildClientWhere(query: Pick<ListClientsQuery, "search">): Prisma.ClientWhereInput {
+  return {
     ...active,
     ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),
   };
+}
+
+const EXPORT_ROW_LIMIT = 5000;
+
+export async function listClients(query: ListClientsQuery): Promise<PaginatedResponse<Client>> {
+  const page = query.page ?? 1;
+  const limit = query.limit ?? 20;
+  const where = buildClientWhere(query);
+  const orderBy = { [query.sortBy ?? "name"]: query.sortOrder ?? "asc" };
 
   const [data, total] = await Promise.all([
     prisma.client.findMany({
       where,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { name: "asc" },
+      orderBy,
     }),
     prisma.client.count({ where }),
   ]);
 
   return { data, total, page, limit };
+}
+
+export async function exportClients(query: Pick<ListClientsQuery, "search" | "sortBy" | "sortOrder">): Promise<Client[]> {
+  const where = buildClientWhere(query);
+  const orderBy = { [query.sortBy ?? "name"]: query.sortOrder ?? "asc" };
+
+  return prisma.client.findMany({ where, orderBy, take: EXPORT_ROW_LIMIT });
 }
 
 export async function getClientById(id: string): Promise<ClientWithLeaseHistory> {

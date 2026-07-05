@@ -36,3 +36,8 @@ export async function updateArtist(id: string, payload: UpdateArtistDTO): Promis
 export async function deleteArtist(id: string): Promise<void> {
   await apiRequest<void>(`/api/artists/${id}`, { method: "DELETE" });
 }
+
+export async function exportArtists(params?: ListArtistsParams): Promise<Artist[]> {
+  const { data } = await apiRequest<{ data: Artist[] }>(`/api/artists/export${buildQueryString(params)}`);
+  return data;
+}

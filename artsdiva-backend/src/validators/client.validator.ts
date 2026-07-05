@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { contactInfoSchema, paginationQuerySchema } from "./common.validator";
+import { contactInfoSchema, paginationQuerySchema, sortQuerySchema } from "./common.validator";
 
 const hasEmailOrPhone = (contactInfo?: z.infer<typeof contactInfoSchema>) =>
   Boolean(contactInfo?.email || contactInfo?.phone);
@@ -37,9 +37,9 @@ export const updateClientSchema = clientBaseSchema.partial().superRefine((data, 
   }
 });
 
-export const listClientsQuerySchema = paginationQuerySchema.extend({
-  search: z.string().optional(),
-});
+export const listClientsQuerySchema = paginationQuerySchema
+  .extend({ search: z.string().optional() })
+  .merge(sortQuerySchema(["name", "createdAt"]));
 
 export type CreateClientInput = z.infer<typeof createClientSchema>;
 export type UpdateClientInput = z.infer<typeof updateClientSchema>;

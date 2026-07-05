@@ -16,11 +16,10 @@ export class InvalidStatusTransitionError extends Error {}
 
 const active = { isDeleted: false };
 
-export async function listArtworks(query: ListArtworksQuery): Promise<PaginatedResponse<Artwork>> {
-  const page = query.page ?? 1;
-  const limit = query.limit ?? 20;
-
-  const where: Prisma.ArtworkWhereInput = {
+function buildArtworkWhere(
+  query: Pick<ListArtworksQuery, "search" | "status" | "artistId">
+): Prisma.ArtworkWhereInput {
+  return {
     ...active,
     ...(query.search
       ? {
@@ -33,6 +32,15 @@ export async function listArtworks(query: ListArtworksQuery): Promise<PaginatedR
     ...(query.status ? { status: query.status } : {}),
     ...(query.artistId ? { artistId: query.artistId } : {}),
   };
+}
+
+const EXPORT_ROW_LIMIT = 5000;
+
+export async function listArtworks(query: ListArtworksQuery): Promise<PaginatedResponse<Artwork>> {
+  const page = query.page ?? 1;
+  const limit = query.limit ?? 20;
+  const where = buildArtworkWhere(query);
+  const orderBy = { [query.sortBy ?? "title"]: query.sortOrder ?? "asc" };
 
   const [data, total] = await Promise.all([
     prisma.artwork.findMany({
@@ -40,12 +48,21 @@ export async function listArtworks(query: ListArtworksQuery): Promise<PaginatedR
       include: { artist: { select: { id: true, name: true } } },
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { title: "asc" },
+      orderBy,
     }),
     prisma.artwork.count({ where }),
   ]);
 
   return { data, total, page, limit };
+}
+
+export async function exportArtworks(
+  query: Pick<ListArtworksQuery, "search" | "status" | "artistId" | "sortBy" | "sortOrder">
+): Promise<Artwork[]> {
+  const where = buildArtworkWhere(query);
+  const orderBy = { [query.sortBy ?? "title"]: query.sortOrder ?? "asc" };
+
+  return prisma.artwork.findMany({ where, orderBy, take: EXPORT_ROW_LIMIT });
 }
 
 export async function getArtworkById(id: string): Promise<ArtworkWithRelations> {

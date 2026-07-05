@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { contactInfoSchema, paginationQuerySchema } from "./common.validator";
+import { contactInfoSchema, paginationQuerySchema, sortQuerySchema } from "./common.validator";
 
 export const createArtistSchema = z.object({
   name: z
@@ -23,9 +23,9 @@ export const createArtistSchema = z.object({
 
 export const updateArtistSchema = createArtistSchema.partial();
 
-export const listArtistsQuerySchema = paginationQuerySchema.extend({
-  search: z.string().optional(),
-});
+export const listArtistsQuerySchema = paginationQuerySchema
+  .extend({ search: z.string().optional() })
+  .merge(sortQuerySchema(["name", "commissionPercent", "mouStatus", "createdAt"]));
 
 export type CreateArtistInput = z.infer<typeof createArtistSchema>;
 export type UpdateArtistInput = z.infer<typeof updateArtistSchema>;

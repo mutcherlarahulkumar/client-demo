@@ -12,6 +12,7 @@ import {
 import {
   createArtworkHandler,
   deleteArtworkHandler,
+  exportArtworksHandler,
   getArtworkHandler,
   listArtworksHandler,
   updateArtworkHandler,
@@ -25,6 +26,8 @@ const router: Router = Router();
 router.use(authenticate);
 
 router.get("/", validateQuery(listArtworksQuerySchema), asyncHandler(listArtworksHandler));
+// Must precede /:id — otherwise Express would treat "export" as an id.
+router.get("/export", validateQuery(listArtworksQuerySchema), asyncHandler(exportArtworksHandler));
 router.get("/:id", asyncHandler(getArtworkHandler));
 router.post("/", validate(createArtworkSchema), asyncHandler(createArtworkHandler));
 router.put("/:id", validate(updateArtworkSchema), asyncHandler(updateArtworkHandler));

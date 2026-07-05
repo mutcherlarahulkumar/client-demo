@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -11,6 +11,8 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TableSortLabel from "@mui/material/TableSortLabel";
+import TablePagination from "@mui/material/TablePagination";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
@@ -20,14 +22,17 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { useArtworks, useDeleteArtwork } from "@artsdiva/hooks/useArtworks";
+import { exportArtworks } from "@artsdiva/api/artwork.api";
 import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
 import { SkeletonTableRows } from "@artsdiva/components/ui/SkeletonTable";
 import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
 import { ImageWithFallback } from "@artsdiva/components/ui/ImagePlaceholder";
 import { useToast } from "@artsdiva/contexts/ToastProvider";
 import { useDebounce } from "@artsdiva/hooks/useDebounce";
-import type { Artwork, ArtworkStatus } from "@artsdiva/types/artwork.types";
+import { toCsv, downloadCsv } from "@artsdiva/utils/csv";
+import type { Artwork, ArtworkSortField, ArtworkStatus } from "@artsdiva/types/artwork.types";
 
 export function ArtworkListContainer() {
   const router = useRouter();
@@ -36,16 +41,59 @@ export function ArtworkListContainer() {
   const [status, setStatus] = useState<ArtworkStatus | "">("");
   const debouncedSearch = useDebounce(search, 300);
   const [deleteTarget, setDeleteTarget] = useState<Artwork | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [sortBy, setSortBy] = useState<ArtworkSortField>("title");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isExporting, setIsExporting] = useState(false);
 
-  const { data, isLoading, error } = useArtworks({
+  const filterParams = {
     search: debouncedSearch || undefined,
     status: status || undefined,
-    limit: 20,
+  };
+
+  const { data, isLoading, error } = useArtworks({
+    ...filterParams,
+    page: page + 1,
+    limit: rowsPerPage,
+    sortBy,
+    sortOrder,
   });
 
   const deleteMutation = useDeleteArtwork();
   const artworks = data?.data ?? [];
   const total = data?.total ?? 0;
+
+  useEffect(() => { setPage(0); }, [debouncedSearch, status, sortBy, sortOrder]);
+
+  const toggleSort = (field: ArtworkSortField) => {
+    if (sortBy === field) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const rows = await exportArtworks({ ...filterParams, sortBy, sortOrder });
+      const csv = toCsv(rows, [
+        { key: "title", label: "Title" },
+        { key: "artist", label: "Artist", value: (r) => r.artist?.name },
+        { key: "medium", label: "Medium" },
+        { key: "year", label: "Year" },
+        { key: "dimensions", label: "Dimensions", value: (r) => formatDimensions(r) },
+        { key: "status", label: "Status" },
+      ]);
+      downloadCsv("artworks.csv", csv);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Failed to export artworks", "error");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -75,9 +123,14 @@ export function ArtworkListContainer() {
             </Typography>
           )}
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => void router.push("/artworks/new")}>
-          Add Artwork
-        </Button>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button variant="outlined" startIcon={<FileDownloadOutlinedIcon />} onClick={() => void handleExport()} disabled={isExporting}>
+            {isExporting ? "Exporting…" : "Export CSV"}
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => void router.push("/artworks/new")}>
+            Add Artwork
+          </Button>
+        </Box>
       </Box>
 
       <Box sx={{ display: "flex", gap: 1.5, mb: 2.5 }}>
@@ -114,12 +167,28 @@ export function ArtworkListContainer() {
           <TableHead>
             <TableRow>
               <TableCell sx={{ width: 56 }}>Image</TableCell>
-              <TableCell>Title</TableCell>
+              <TableCell sortDirection={sortBy === "title" ? sortOrder : false}>
+                <TableSortLabel active={sortBy === "title"} direction={sortBy === "title" ? sortOrder : "asc"} onClick={() => toggleSort("title")}>
+                  Title
+                </TableSortLabel>
+              </TableCell>
               <TableCell>Artist</TableCell>
-              <TableCell>Medium</TableCell>
-              <TableCell>Year</TableCell>
+              <TableCell sortDirection={sortBy === "medium" ? sortOrder : false}>
+                <TableSortLabel active={sortBy === "medium"} direction={sortBy === "medium" ? sortOrder : "asc"} onClick={() => toggleSort("medium")}>
+                  Medium
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sortDirection={sortBy === "year" ? sortOrder : false}>
+                <TableSortLabel active={sortBy === "year"} direction={sortBy === "year" ? sortOrder : "asc"} onClick={() => toggleSort("year")}>
+                  Year
+                </TableSortLabel>
+              </TableCell>
               <TableCell>Dimensions</TableCell>
-              <TableCell>Status</TableCell>
+              <TableCell sortDirection={sortBy === "status" ? sortOrder : false}>
+                <TableSortLabel active={sortBy === "status"} direction={sortBy === "status" ? sortOrder : "asc"} onClick={() => toggleSort("status")}>
+                  Status
+                </TableSortLabel>
+              </TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -200,6 +269,16 @@ export function ArtworkListContainer() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={total}
+        page={page}
+        onPageChange={(_, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+        rowsPerPageOptions={[10, 20, 50, 100]}
+      />
 
       <ConfirmDialog
         open={!!deleteTarget}

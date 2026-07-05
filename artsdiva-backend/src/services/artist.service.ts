@@ -9,26 +9,41 @@ export class ArtistHasArtworksError extends Error {}
 
 const active = { isDeleted: false };
 
-export async function listArtists(query: ListArtistsQuery): Promise<PaginatedResponse<Artist>> {
-  const page = query.page ?? 1;
-  const limit = query.limit ?? 20;
-
-  const where: Prisma.ArtistWhereInput = {
+function buildArtistWhere(query: Pick<ListArtistsQuery, "search">): Prisma.ArtistWhereInput {
+  return {
     ...active,
     ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),
   };
+}
+
+export async function listArtists(query: ListArtistsQuery): Promise<PaginatedResponse<Artist>> {
+  const page = query.page ?? 1;
+  const limit = query.limit ?? 20;
+  const where = buildArtistWhere(query);
+  const orderBy = { [query.sortBy ?? "name"]: query.sortOrder ?? "asc" };
 
   const [data, total] = await Promise.all([
     prisma.artist.findMany({
       where,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { name: "asc" },
+      orderBy,
     }),
     prisma.artist.count({ where }),
   ]);
 
   return { data, total, page, limit };
+}
+
+// Unpaginated variant for CSV export — same filters, capped at a safety
+// limit rather than the normal page size.
+const EXPORT_ROW_LIMIT = 5000;
+
+export async function exportArtists(query: Pick<ListArtistsQuery, "search" | "sortBy" | "sortOrder">): Promise<Artist[]> {
+  const where = buildArtistWhere(query);
+  const orderBy = { [query.sortBy ?? "name"]: query.sortOrder ?? "asc" };
+
+  return prisma.artist.findMany({ where, orderBy, take: EXPORT_ROW_LIMIT });
 }
 
 export async function getArtistById(id: string): Promise<ArtistWithArtworks> {

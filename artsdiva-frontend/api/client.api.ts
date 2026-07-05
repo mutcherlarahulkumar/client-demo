@@ -36,3 +36,8 @@ export async function updateClient(id: string, payload: UpdateClientDTO): Promis
 export async function deleteClient(id: string): Promise<void> {
   await apiRequest<void>(`/api/clients/${id}`, { method: "DELETE" });
 }
+
+export async function exportClients(params?: ListClientsParams): Promise<Client[]> {
+  const { data } = await apiRequest<{ data: Client[] }>(`/api/clients/export${buildQueryString(params)}`);
+  return data;
+}

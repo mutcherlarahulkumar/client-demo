@@ -30,8 +30,12 @@ export interface CreateArtistDTO {
 
 export type UpdateArtistDTO = Partial<CreateArtistDTO>;
 
+export type ArtistSortField = "name" | "commissionPercent" | "mouStatus" | "createdAt";
+
 export interface ListArtistsParams {
   search?: string;
   page?: number;
   limit?: number;
+  sortBy?: ArtistSortField;
+  sortOrder?: "asc" | "desc";
 }

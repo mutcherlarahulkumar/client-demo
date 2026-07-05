@@ -40,10 +40,14 @@ export interface CreateArtworkDTO {
 
 export type UpdateArtworkDTO = Partial<CreateArtworkDTO>;
 
+export type ArtworkSortField = "title" | "medium" | "year" | "status" | "createdAt";
+
 export interface ListArtworksParams {
   search?: string;
   status?: ArtworkStatus;
   artistId?: string;
   page?: number;
   limit?: number;
+  sortBy?: ArtworkSortField;
+  sortOrder?: "asc" | "desc";
 }

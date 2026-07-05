@@ -6,6 +6,7 @@ import { createArtistSchema, listArtistsQuerySchema, updateArtistSchema } from "
 import {
   createArtistHandler,
   deleteArtistHandler,
+  exportArtistsHandler,
   getArtistHandler,
   listArtistsHandler,
   updateArtistHandler,
@@ -17,6 +18,8 @@ const router: Router = Router();
 router.use(authenticate);
 
 router.get("/", validateQuery(listArtistsQuerySchema), asyncHandler(listArtistsHandler));
+// Must precede /:id — otherwise Express would treat "export" as an id.
+router.get("/export", validateQuery(listArtistsQuerySchema), asyncHandler(exportArtistsHandler));
 router.get("/:id", asyncHandler(getArtistHandler));
 router.post("/", validate(createArtistSchema), asyncHandler(createArtistHandler));
 router.put("/:id", validate(updateArtistSchema), asyncHandler(updateArtistHandler));

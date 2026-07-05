@@ -32,6 +32,12 @@ export async function listArtworksHandler(_req: Request, res: Response): Promise
   res.status(200).json(result);
 }
 
+export async function exportArtworksHandler(_req: Request, res: Response): Promise<void> {
+  const query = res.locals.query as ListArtworksQuery;
+  const data = await artworkService.exportArtworks(query);
+  res.status(200).json({ data });
+}
+
 export async function getArtworkHandler(req: Request, res: Response): Promise<void> {
   try {
     const artwork = await artworkService.getArtworkById(req.params.id as string);

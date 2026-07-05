@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { paginationQuerySchema } from "./common.validator";
+import { paginationQuerySchema, sortQuerySchema } from "./common.validator";
 
 const artworkStatusEnum = z.enum(["IN_COLLECTION", "ON_LEASE", "SOLD"]);
 
@@ -44,11 +44,13 @@ export const updateArtworkStatusSchema = z.object({
   status: artworkStatusEnum,
 });
 
-export const listArtworksQuerySchema = paginationQuerySchema.extend({
-  search: z.string().optional(),
-  status: artworkStatusEnum.optional(),
-  artistId: z.string().optional(),
-});
+export const listArtworksQuerySchema = paginationQuerySchema
+  .extend({
+    search: z.string().optional(),
+    status: artworkStatusEnum.optional(),
+    artistId: z.string().optional(),
+  })
+  .merge(sortQuerySchema(["title", "medium", "year", "status", "createdAt"]));
 
 export type CreateArtworkInput = z.infer<typeof createArtworkSchema>;
 export type UpdateArtworkInput = z.infer<typeof updateArtworkSchema>;

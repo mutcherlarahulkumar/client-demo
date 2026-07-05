@@ -29,3 +29,12 @@ export const paginationQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
 });
+
+// Shared shape for backend-driven column sorting on list endpoints — each
+// entity restricts `sortBy` to its own sortable field names.
+export function sortQuerySchema<T extends [string, ...string[]]>(fields: T) {
+  return z.object({
+    sortBy: z.enum(fields).optional(),
+    sortOrder: z.enum(["asc", "desc"]).optional(),
+  });
+}

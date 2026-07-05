@@ -8,6 +8,12 @@ export async function listArtistsHandler(_req: Request, res: Response): Promise<
   res.status(200).json(result);
 }
 
+export async function exportArtistsHandler(_req: Request, res: Response): Promise<void> {
+  const query = res.locals.query as ListArtistsQuery;
+  const data = await artistService.exportArtists(query);
+  res.status(200).json({ data });
+}
+
 export async function getArtistHandler(req: Request, res: Response): Promise<void> {
   try {
     const artist = await artistService.getArtistById(req.params.id as string);

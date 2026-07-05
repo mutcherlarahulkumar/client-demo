@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -10,6 +10,8 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TableSortLabel from "@mui/material/TableSortLabel";
+import TablePagination from "@mui/material/TablePagination";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
@@ -20,13 +22,16 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { useArtists, useDeleteArtist } from "@artsdiva/hooks/useArtists";
+import { exportArtists } from "@artsdiva/api/artist.api";
 import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
 import { SkeletonTableRows } from "@artsdiva/components/ui/SkeletonTable";
 import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
 import { useToast } from "@artsdiva/contexts/ToastProvider";
-import type { Artist } from "@artsdiva/types/artist.types";
+import type { Artist, ArtistSortField } from "@artsdiva/types/artist.types";
 import { useDebounce } from "@artsdiva/hooks/useDebounce";
+import { toCsv, downloadCsv } from "@artsdiva/utils/csv";
 
 function initials(name: string) {
   return name
@@ -43,16 +48,58 @@ export function ArtistListContainer() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
   const [deleteTarget, setDeleteTarget] = useState<Artist | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [sortBy, setSortBy] = useState<ArtistSortField>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isExporting, setIsExporting] = useState(false);
 
-  const { data, isLoading, error } = useArtists({
+  const listParams = {
     search: debouncedSearch || undefined,
-    limit: 20,
-  });
+    page: page + 1,
+    limit: rowsPerPage,
+    sortBy,
+    sortOrder,
+  };
+
+  const { data, isLoading, error } = useArtists(listParams);
 
   const deleteMutation = useDeleteArtist();
 
   const artists = data?.data ?? [];
   const total = data?.total ?? 0;
+
+  // Reset to the first page whenever the result set could change shape.
+  useEffect(() => { setPage(0); }, [debouncedSearch, sortBy, sortOrder]);
+
+  const toggleSort = (field: ArtistSortField) => {
+    if (sortBy === field) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const rows = await exportArtists({ search: debouncedSearch || undefined, sortBy, sortOrder });
+      const csv = toCsv(rows, [
+        { key: "name", label: "Name" },
+        { key: "commissionPercent", label: "Commission %" },
+        { key: "commissionTerms", label: "Commission Terms" },
+        { key: "mouStatus", label: "MOU Status" },
+        { key: "email", label: "Email", value: (r) => r.contactInfo?.email },
+        { key: "phone", label: "Phone", value: (r) => r.contactInfo?.phone },
+      ]);
+      downloadCsv("artists.csv", csv);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Failed to export artists", "error");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -94,13 +141,23 @@ export function ArtistListContainer() {
             </Typography>
           )}
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => void router.push("/artists/new")}
-        >
-          Add Artist
-        </Button>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<FileDownloadOutlinedIcon />}
+            onClick={() => void handleExport()}
+            disabled={isExporting}
+          >
+            {isExporting ? "Exporting…" : "Export CSV"}
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => void router.push("/artists/new")}
+          >
+            Add Artist
+          </Button>
+        </Box>
       </Box>
 
       {/* Search */}
@@ -143,9 +200,21 @@ export function ArtistListContainer() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Commission Terms</TableCell>
-              <TableCell>MOU Status</TableCell>
+              <TableCell sortDirection={sortBy === "name" ? sortOrder : false}>
+                <TableSortLabel active={sortBy === "name"} direction={sortBy === "name" ? sortOrder : "asc"} onClick={() => toggleSort("name")}>
+                  Name
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sortDirection={sortBy === "commissionPercent" ? sortOrder : false}>
+                <TableSortLabel active={sortBy === "commissionPercent"} direction={sortBy === "commissionPercent" ? sortOrder : "asc"} onClick={() => toggleSort("commissionPercent")}>
+                  Commission Terms
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sortDirection={sortBy === "mouStatus" ? sortOrder : false}>
+                <TableSortLabel active={sortBy === "mouStatus"} direction={sortBy === "mouStatus" ? sortOrder : "asc"} onClick={() => toggleSort("mouStatus")}>
+                  MOU Status
+                </TableSortLabel>
+              </TableCell>
               <TableCell>Contact</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
@@ -272,6 +341,16 @@ export function ArtistListContainer() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={total}
+        page={page}
+        onPageChange={(_, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+        rowsPerPageOptions={[10, 20, 50, 100]}
+      />
 
       <ConfirmDialog
         open={!!deleteTarget}
