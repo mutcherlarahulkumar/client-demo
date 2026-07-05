@@ -23,6 +23,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { BackLink } from "@artsdiva/components/ui/BackLink";
 import { useArtist, useDeleteArtist } from "@artsdiva/hooks/useArtists";
+import { useDocuments } from "@artsdiva/hooks/useDocuments";
+import { DocumentLogSection } from "@artsdiva/components/DocumentLogSection";
+import type { DocumentFileType } from "@artsdiva/types/document.types";
 import { StatusBadge } from "@artsdiva/components/ui/StatusBadge";
 import { SkeletonDetailCard } from "@artsdiva/components/ui/SkeletonTable";
 import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
@@ -53,6 +56,8 @@ export function ArtistDetailContainer({
 
   const { data: artist, isLoading, error } = useArtist(artistId);
   const deleteMutation = useDeleteArtist();
+  const documents = useDocuments("ARTIST", artistId);
+  const [documentType, setDocumentType] = useState<DocumentFileType>("MOU");
 
   const artworks = artist?.artworks ?? [];
 
@@ -379,6 +384,19 @@ export function ArtistDetailContainer({
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Box sx={{ mt: 3 }}>
+        <DocumentLogSection
+          documents={documents.documents}
+          isLoading={documents.isLoading}
+          error={documents.error}
+          canDelete={user?.role === "ADMIN"}
+          fileType={documentType}
+          onFileTypeChange={setDocumentType}
+          onUpload={(file) => void documents.upload(documentType, file)}
+          onDelete={(id) => void documents.remove(id)}
+        />
+      </Box>
 
       <ConfirmDialog
         open={deleteOpen}

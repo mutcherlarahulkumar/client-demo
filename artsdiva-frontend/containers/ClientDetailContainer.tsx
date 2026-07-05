@@ -14,6 +14,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useClient, useDeleteClient } from "@artsdiva/hooks/useClients";
 import { useLeaseHistory } from "@artsdiva/hooks/useLeases";
 import { LeaseHistoryTable } from "@artsdiva/components/LeaseHistoryTable";
+import { useDocuments } from "@artsdiva/hooks/useDocuments";
+import { DocumentLogSection } from "@artsdiva/components/DocumentLogSection";
+import type { DocumentFileType } from "@artsdiva/types/document.types";
 import { SkeletonDetailCard } from "@artsdiva/components/ui/SkeletonTable";
 import { ConfirmDialog } from "@artsdiva/components/ui/ConfirmDialog";
 import { useToast } from "@artsdiva/contexts/ToastProvider";
@@ -37,6 +40,8 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
   const { data: client, isLoading, error } = useClient(clientId);
   const deleteMutation = useDeleteClient();
   const leaseHistory = useLeaseHistory({ clientId, limit: 50 });
+  const documents = useDocuments("CLIENT", clientId);
+  const [documentType, setDocumentType] = useState<DocumentFileType>("CONTRACT");
 
   const handleDelete = async () => {
     try {
@@ -176,6 +181,19 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
           show="artwork"
           onRowClick={(lease) => void router.push(`/artworks/${lease.artwork.id}`)}
         />
+
+        <Box sx={{ mt: 3 }}>
+          <DocumentLogSection
+            documents={documents.documents}
+            isLoading={documents.isLoading}
+            error={documents.error}
+            canDelete={user?.role === "ADMIN"}
+            fileType={documentType}
+            onFileTypeChange={setDocumentType}
+            onUpload={(file) => void documents.upload(documentType, file)}
+            onDelete={(id) => void documents.remove(id)}
+          />
+        </Box>
       </Box>
 
       <ConfirmDialog
