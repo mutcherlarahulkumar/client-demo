@@ -20,10 +20,13 @@ import DashboardIcon from "@mui/icons-material/DashboardOutlined";
 import PaletteIcon from "@mui/icons-material/PaletteOutlined";
 import ImageIcon from "@mui/icons-material/ImageOutlined";
 import PeopleIcon from "@mui/icons-material/PeopleOutlined";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
+import LockResetIcon from "@mui/icons-material/LockResetOutlined";
 import BrushIcon from "@mui/icons-material/Brush";
 import { useAuth } from "@artsdiva/hooks/useAuth";
 import { GlobalSearch } from "@artsdiva/components/GlobalSearch";
+import type { Role } from "@artsdiva/types/auth.types";
 
 const DRAWER_WIDTH = 240;
 
@@ -40,6 +43,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Clients",   href: "/clients",  icon: <PeopleIcon fontSize="small" /> },
 ];
 
+const ADMIN_NAV_ITEM: NavItem = { label: "Users", href: "/users", icon: <AdminPanelSettingsIcon fontSize="small" /> };
+
 function initials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
@@ -47,10 +52,12 @@ function initials(name: string) {
 interface DrawerContentProps {
   activeHref: string;
   userName?: string;
+  userRole?: Role;
   onLogout: () => void;
 }
 
-function DrawerContent({ activeHref, userName, onLogout }: DrawerContentProps) {
+function DrawerContent({ activeHref, userName, userRole, onLogout }: DrawerContentProps) {
+  const navItems = userRole === "ADMIN" ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS;
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Brand */}
@@ -77,7 +84,7 @@ function DrawerContent({ activeHref, userName, onLogout }: DrawerContentProps) {
 
       {/* Navigation */}
       <List sx={{ flex: 1, px: 1.5, pt: 1.5 }}>
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const active = activeHref === item.href;
           return (
             <Link key={item.href} href={item.href} style={{ textDecoration: "none", color: "inherit" }}>
@@ -133,6 +140,11 @@ function DrawerContent({ activeHref, userName, onLogout }: DrawerContentProps) {
             >
               {userName}
             </Typography>
+            <Tooltip title="Change password">
+              <IconButton size="small" component={Link} href="/settings/change-password" aria-label="change password">
+                <LockResetIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Log out">
               <IconButton size="small" onClick={onLogout} aria-label="logout">
                 <LogoutIcon fontSize="small" />
@@ -176,7 +188,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
 
   const activeHref = "/" + router.pathname.split("/")[1];
   const drawerContent = (
-    <DrawerContent activeHref={activeHref} userName={user.name} onLogout={handleLogout} />
+    <DrawerContent activeHref={activeHref} userName={user.name} userRole={user.role} onLogout={handleLogout} />
   );
 
   return (

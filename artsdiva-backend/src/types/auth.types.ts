@@ -31,6 +31,19 @@ export interface MeResponse {
   user: AuthenticatedUser;
 }
 
+export interface UserSummary {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  createdAt: Date;
+}
+
+export interface ChangePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface JwtPayload {
   id: string;
   email: string;

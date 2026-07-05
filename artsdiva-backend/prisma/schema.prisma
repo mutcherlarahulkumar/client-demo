@@ -71,16 +71,19 @@ type Dimensions {
 // ---------------------------------------------------------------------------
 
 model User {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
   name         String
-  email        String @unique
+  email        String  @unique
   passwordHash String
-  role         Role   @default(STAFF)
+  role         Role    @default(STAFF)
+  isDeleted    Boolean @default(false)
 
   uploadedDocuments DocumentLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([isDeleted])
 }
 
 model Artist {

@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { AUTH_COOKIE_NAME } from "../lib/jwt";
 import * as authService from "../services/auth.service";
-import type { CreateUserDTO, LoginDTO } from "../types/auth.types";
+import type { ChangePasswordDTO, CreateUserDTO, LoginDTO } from "../types/auth.types";
+import type { ListUsersQuery } from "../validators/auth.validator";
 
 const isProduction = process.env.NODE_ENV === "production";
 // Mirrors JWT_EXPIRES_IN's default so the cookie doesn't outlive the token.
@@ -65,6 +66,54 @@ export async function meHandler(req: Request, res: Response): Promise<void> {
   } catch (err) {
     if (err instanceof authService.UserNotFoundError) {
       res.status(404).json({ message: err.message });
+      return;
+    }
+    throw err;
+  }
+}
+
+export async function listUsersHandler(_req: Request, res: Response): Promise<void> {
+  const query = res.locals.query as ListUsersQuery;
+  const result = await authService.listUsers(query);
+  res.status(200).json(result);
+}
+
+export async function changePasswordHandler(req: Request, res: Response): Promise<void> {
+  const { id } = req.user as NonNullable<Request["user"]>;
+  const input = req.body as ChangePasswordDTO;
+
+  try {
+    await authService.changePassword(id, input);
+    res.status(200).json({ message: "Password changed" });
+  } catch (err) {
+    if (err instanceof authService.InvalidCredentialsError) {
+      res.status(401).json({ message: err.message });
+      return;
+    }
+    if (err instanceof authService.UserNotFoundError) {
+      res.status(404).json({ message: err.message });
+      return;
+    }
+    throw err;
+  }
+}
+
+export async function deactivateUserHandler(req: Request, res: Response): Promise<void> {
+  const { id: requestingUserId } = req.user as NonNullable<Request["user"]>;
+
+  try {
+    await authService.deactivateUser(req.params.id as string, requestingUserId);
+    res.status(200).json({ message: "User deactivated" });
+  } catch (err) {
+    if (err instanceof authService.UserNotFoundError) {
+      res.status(404).json({ message: err.message });
+      return;
+    }
+    if (
+      err instanceof authService.CannotDeactivateSelfError ||
+      err instanceof authService.LastAdminError
+    ) {
+      res.status(400).json({ message: err.message });
       return;
     }
     throw err;

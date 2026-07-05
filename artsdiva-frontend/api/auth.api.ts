@@ -1,10 +1,14 @@
-import { apiRequest } from "@artsdiva/api/http";
+import { apiRequest, buildQueryString } from "@artsdiva/api/http";
+import type { PaginatedResponse } from "@artsdiva/types/common.types";
 import type {
   AuthenticatedUser,
+  ChangePasswordDTO,
   CreateUserDTO,
+  ListUsersParams,
   LoginDTO,
   LoginResponse,
   MeResponse,
+  UserSummary,
 } from "@artsdiva/types/auth.types";
 
 export function login(payload: LoginDTO): Promise<LoginResponse> {
@@ -29,4 +33,19 @@ export async function createUser(payload: CreateUserDTO): Promise<AuthenticatedU
 
 export async function logout(): Promise<void> {
   await apiRequest<{ message: string }>("/api/auth/logout", { method: "POST" });
+}
+
+export function getUsers(params?: ListUsersParams): Promise<PaginatedResponse<UserSummary>> {
+  return apiRequest<PaginatedResponse<UserSummary>>(`/api/auth/users${buildQueryString(params)}`);
+}
+
+export async function changePassword(payload: ChangePasswordDTO): Promise<void> {
+  await apiRequest<{ message: string }>("/api/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deactivateUser(id: string): Promise<void> {
+  await apiRequest<{ message: string }>(`/api/auth/users/${id}/deactivate`, { method: "PATCH" });
 }
