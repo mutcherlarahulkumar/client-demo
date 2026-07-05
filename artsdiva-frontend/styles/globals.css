@@ -37,7 +37,11 @@ table tr[class*="cursor-pointer"]:hover {
   background: var(--surface);
 }
 
-button {
+/* Scoped to plain (non-MUI) buttons only — a bare `button` selector here
+   fought with MUI's own hover styles (both target the same native <button>
+   element) and its near-white --surface hover color made every MUI button
+   appear to vanish against the white cards/page background on hover. */
+button:not([class*="Mui"]) {
   border-radius: 0.25rem;
   transition:
     background-color 0.15s ease,
@@ -45,11 +49,11 @@ button {
     opacity 0.15s ease;
 }
 
-button:not(:disabled):hover {
+button:not([class*="Mui"]):not(:disabled):hover {
   background: var(--surface);
 }
 
-button:disabled {
+button:not([class*="Mui"]):disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
