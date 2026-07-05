@@ -72,6 +72,7 @@ export async function createLease(input: CreateLeaseInput): Promise<Lease> {
         clientId: input.clientId,
         startDate: input.startDate,
         endDate: input.endDate,
+        rateAmount: input.rateAmount,
         terms: input.terms,
         status: "ACTIVE",
       },

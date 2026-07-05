@@ -8,6 +8,10 @@ export const createArtistSchema = z.object({
     .max(150, "Name too long"),
   bio: z.string().max(5000, "Bio too long").optional(),
   contactInfo: contactInfoSchema.optional(),
+  commissionPercent: z.coerce
+    .number({ invalid_type_error: "Commission percent must be a number" })
+    .min(0, "Commission percent cannot be negative")
+    .max(100, "Commission percent cannot exceed 100"),
   commissionTerms: z
     .string()
     .min(1, "Commission terms are required")

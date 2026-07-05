@@ -6,6 +6,9 @@ export const createLeaseSchema = z.object({
   clientId: z.string().min(1, "clientId is required"),
   startDate: z.coerce.date(),
   endDate: z.coerce.date().optional(),
+  rateAmount: z.coerce
+    .number({ invalid_type_error: "Lease rate must be a number" })
+    .positive("Lease rate must be greater than 0"),
   terms: z.string().optional(),
 });
 

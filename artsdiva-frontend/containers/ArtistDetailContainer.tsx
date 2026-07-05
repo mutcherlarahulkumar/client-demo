@@ -168,6 +168,20 @@ export function ArtistDetailContainer({
                   color="text.secondary"
                   sx={{ display: "block" }}
                 >
+                  Commission Split
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {artist.commissionPercent != null
+                    ? `${artist.commissionPercent}% artist / ${Math.round((100 - artist.commissionPercent) * 100) / 100}% gallery`
+                    : "—"}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block" }}
+                >
                   Commission Terms
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>

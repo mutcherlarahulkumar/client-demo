@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useLeases } from "@artsdiva/hooks/useLeases";
 import { LeaseForm, type LeaseFormValues } from "@artsdiva/components/LeaseForm";
 
-const emptyValues: LeaseFormValues = { clientId: "", startDate: "", terms: "" };
+const emptyValues: LeaseFormValues = { clientId: "", startDate: "", rateAmount: "", terms: "" };
 
 interface LeaseFormContainerProps {
   artworkId: string;
@@ -34,6 +34,7 @@ export function LeaseFormContainer({ artworkId, onLeased, onCancel }: LeaseFormC
       artworkId,
       clientId: values.clientId,
       startDate: values.startDate,
+      rateAmount: Number(values.rateAmount),
       terms: values.terms || undefined,
     }).then((lease) => {
       if (lease) setValues(emptyValues);

@@ -8,6 +8,7 @@ export interface Artist {
   name: string;
   bio?: string | null;
   contactInfo?: ContactInfo | null;
+  commissionPercent?: number | null;
   commissionTerms: string;
   mouStatus: MouStatus;
   createdAt: string;
@@ -22,6 +23,7 @@ export interface CreateArtistDTO {
   name: string;
   bio?: string;
   contactInfo?: ContactInfo;
+  commissionPercent: number;
   commissionTerms: string;
   mouStatus: MouStatus;
 }

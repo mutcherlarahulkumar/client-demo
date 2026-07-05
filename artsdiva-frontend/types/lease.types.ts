@@ -6,6 +6,7 @@ export interface Lease {
   clientId: string;
   startDate: string;
   endDate?: string | null;
+  rateAmount?: number | null;
   terms?: string | null;
   status: LeaseStatus;
   createdAt: string;
@@ -17,6 +18,7 @@ export interface CreateLeaseDTO {
   clientId: string;
   startDate: string;
   endDate?: string;
+  rateAmount: number;
   terms?: string;
 }
 

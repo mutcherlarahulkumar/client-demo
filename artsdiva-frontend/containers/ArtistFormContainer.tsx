@@ -26,6 +26,11 @@ const PHONE_RE = /^[\d\s\-().]{6,15}$/;
 const validationSchema = Yup.object({
   name: Yup.string().min(2, "At least 2 characters").max(150).required("Name is required"),
   bio: Yup.string().max(5000).optional(),
+  commissionPercent: Yup.number()
+    .typeError("Must be a number")
+    .min(0, "Cannot be negative")
+    .max(100, "Cannot exceed 100")
+    .required("Commission % is required"),
   commissionTerms: Yup.string().min(1).max(500).required("Commission terms required"),
   mouStatus: Yup.mixed<MouStatus>().oneOf(["SIGNED", "PENDING", "NOT_REQUIRED"]).required(),
   email: Yup.string().transform((v) => (v === "" ? undefined : v)).email("Invalid email").optional(),
@@ -37,6 +42,7 @@ const validationSchema = Yup.object({
 interface FormValues {
   name: string;
   bio: string;
+  commissionPercent: string;
   commissionTerms: string;
   mouStatus: MouStatus;
   email: string;
@@ -48,6 +54,7 @@ interface FormValues {
 const EMPTY: FormValues = {
   name: "",
   bio: "",
+  commissionPercent: "",
   commissionTerms: "",
   mouStatus: "PENDING",
   email: "",
@@ -79,6 +86,7 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
     ? {
         name: artist.name,
         bio: artist.bio ?? "",
+        commissionPercent: artist.commissionPercent != null ? String(artist.commissionPercent) : "",
         commissionTerms: artist.commissionTerms,
         mouStatus: artist.mouStatus,
         email: artist.contactInfo?.email ?? "",
@@ -98,6 +106,7 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
         phone: values.phone || undefined,
         address: values.address || undefined,
       },
+      commissionPercent: Number(values.commissionPercent),
       commissionTerms: values.commissionTerms,
       mouStatus: values.mouStatus,
     };
@@ -158,20 +167,22 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
                     />
                   </Box>
 
-                  {/* Commission Terms + MOU Status side by side */}
+                  {/* Commission % + MOU Status side by side */}
                   <Box sx={{ display: "flex", gap: 2 }}>
                     <Box sx={{ flex: 1 }}>
-                      <FieldLabel label="Commission Terms" required info="The split or fee agreed with the artist when their work sells or leases. Example: 30% on sale" />
+                      <FieldLabel label="Artist Share (%)" required info="The artist's percentage of sale/lease revenue. Example: 70 for a 70/30 split (artist keeps 70%, gallery keeps 30%)." />
                       <TextField
-                        name="commissionTerms"
+                        name="commissionPercent"
                         size="small"
                         fullWidth
-                        placeholder="30% on sale"
-                        value={values.commissionTerms}
+                        type="number"
+                        placeholder="70"
+                        value={values.commissionPercent}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        error={touched.commissionTerms && !!errors.commissionTerms}
-                        helperText={touched.commissionTerms ? errors.commissionTerms : undefined}
+                        error={touched.commissionPercent && !!errors.commissionPercent}
+                        helperText={touched.commissionPercent ? errors.commissionPercent : undefined}
+                        slotProps={{ htmlInput: { min: 0, max: 100, step: "0.5" } }}
                       />
                     </Box>
                     <Box sx={{ flex: 1 }}>
@@ -192,6 +203,22 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
                         <MenuItem value="NOT_REQUIRED">Not Required</MenuItem>
                       </TextField>
                     </Box>
+                  </Box>
+
+                  {/* Freeform commission notes alongside the structured % */}
+                  <Box>
+                    <FieldLabel label="Commission Terms" required info="Freeform notes on the agreement — payment schedule, exceptions, special conditions. Example: 70/30 split, paid within 30 days of sale" />
+                    <TextField
+                      name="commissionTerms"
+                      size="small"
+                      fullWidth
+                      placeholder="70/30 split, paid within 30 days of sale"
+                      value={values.commissionTerms}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.commissionTerms && !!errors.commissionTerms}
+                      helperText={touched.commissionTerms ? errors.commissionTerms : undefined}
+                    />
                   </Box>
 
                   <Divider />

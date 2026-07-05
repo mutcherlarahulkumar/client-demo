@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { contactInfoSchema, paginationQuerySchema } from "./common.validator";
 
-export const createClientSchema = z.object({
+const hasEmailOrPhone = (contactInfo?: z.infer<typeof contactInfoSchema>) =>
+  Boolean(contactInfo?.email || contactInfo?.phone);
+
+const clientBaseSchema = z.object({
   name: z
     .string()
     .min(2, "Name must be at least 2 characters")
@@ -11,7 +14,28 @@ export const createClientSchema = z.object({
   notes: z.string().max(2000, "Notes too long").optional(),
 });
 
-export const updateClientSchema = createClientSchema.partial();
+// Clients must be reachable: at least one of email or phone is required.
+export const createClientSchema = clientBaseSchema.superRefine((data, ctx) => {
+  if (!hasEmailOrPhone(data.contactInfo)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["contactInfo"],
+      message: "Provide at least one of email or phone",
+    });
+  }
+});
+
+// On update, only enforce reachability when contactInfo is being changed —
+// otherwise a partial update (e.g. rename) would fail for no reason.
+export const updateClientSchema = clientBaseSchema.partial().superRefine((data, ctx) => {
+  if (data.contactInfo !== undefined && !hasEmailOrPhone(data.contactInfo)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["contactInfo"],
+      message: "Provide at least one of email or phone",
+    });
+  }
+});
 
 export const listClientsQuerySchema = paginationQuerySchema.extend({
   search: z.string().optional(),

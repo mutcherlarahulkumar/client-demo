@@ -11,6 +11,7 @@ import type { FieldErrors } from "@artsdiva/api/http";
 export interface LeaseFormValues {
   clientId: string;
   startDate: string;
+  rateAmount: string;
   terms: string;
 }
 
@@ -67,6 +68,27 @@ export function LeaseForm({
           helperText={fieldErrors?.startDate?.[0]}
           disabled={isSubmitting}
           slotProps={{ inputLabel: { shrink: true } }}
+        />
+      </Box>
+
+      <Box>
+        <FieldLabel
+          label="Lease Rate"
+          required
+          info="The amount charged for this lease, from the tiered percentage of the artwork's value. Example: 450"
+        />
+        <TextField
+          type="number"
+          size="small"
+          required
+          fullWidth
+          placeholder="450"
+          value={values.rateAmount}
+          onChange={(e) => onChange("rateAmount", e.target.value)}
+          error={!!fieldErrors?.rateAmount}
+          helperText={fieldErrors?.rateAmount?.[0]}
+          disabled={isSubmitting}
+          slotProps={{ htmlInput: { min: 0.01, step: "0.01" } }}
         />
       </Box>
 

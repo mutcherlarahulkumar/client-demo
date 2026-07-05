@@ -33,14 +33,26 @@ const validationSchema = Yup.object({
   email: Yup.string()
     .transform((v) => (v === "" ? undefined : v))
     .email("Invalid email")
-    .optional(),
+    .test(
+      "email-or-phone",
+      "Provide an email or a phone number",
+      function (value) {
+        return Boolean(value || this.parent.phone);
+      },
+    ),
   phoneCountryCode: Yup.string()
     .matches(PHONE_CODE_RE, "Invalid dial code")
     .optional(),
   phone: Yup.string()
     .transform((v) => (v === "" ? undefined : v))
     .matches(PHONE_RE, "Invalid phone number")
-    .optional(),
+    .test(
+      "email-or-phone",
+      "Provide an email or a phone number",
+      function (value) {
+        return Boolean(value || this.parent.email);
+      },
+    ),
   address: Yup.string().max(500, "Too long").optional(),
   preferences: Yup.string().max(2000, "Too long").optional(),
   notes: Yup.string().max(2000, "Too long").optional(),
@@ -176,7 +188,7 @@ export function ClientFormContainer({ clientId }: ClientFormContainerProps) {
 
                   <Divider />
                   <Typography variant="subtitle2" color="text.secondary">
-                    Contact Information
+                    Contact Information (email or phone required)
                   </Typography>
 
                   <Box>
