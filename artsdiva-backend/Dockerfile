@@ -13,10 +13,13 @@ RUN corepack enable
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
+# Prisma schema must exist before install — the postinstall hook runs
+# `prisma generate` automatically, and needs prisma/schema.prisma present.
+COPY prisma ./prisma
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm prisma generate && pnpm build
+RUN pnpm build
 
 # ---- runtime stage -------------------------------------------------------
 FROM node:20-slim AS runner
