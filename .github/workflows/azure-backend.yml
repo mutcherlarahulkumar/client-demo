@@ -1,0 +1,88 @@
+name: Build and deploy Node.js app to Azure Web App - artsdiva-be
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: artsdiva-be
+  NODE_VERSION: '22.x'
+  PNPM_VERSION: '9'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: artsdiva-backend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: artsdiva-backend
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: artsdiva-backend
+        run: pnpm prisma generate
+
+      - name: Build
+        working-directory: artsdiva-backend
+        run: pnpm build
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Zip-deploy Web Apps don't run docker-entrypoint.sh, so schema sync and
+      # the first-admin seed have to happen here instead. Runs directly
+      # against the production DB using the same secrets Azure has.
+      - name: Sync Prisma schema to MongoDB
+        working-directory: artsdiva-backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm prisma db push --skip-generate --accept-data-loss
+
+      - name: Backfill isDeleted on pre-existing documents
+        working-directory: artsdiva-backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx ts-node scripts/migrate-isdeleted.ts
+
+      - name: Seed initial admin user (skips if one already exists)
+        working-directory: artsdiva-backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SEED_ADMIN_EMAIL: ${{ secrets.SEED_ADMIN_EMAIL }}
+          SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
+          SEED_ADMIN_NAME: ${{ secrets.SEED_ADMIN_NAME }}
+        run: pnpm seed
+
+      # Azure's own Oryx builder would otherwise re-run `npm install` on the
+      # zipped package (ignoring pnpm-lock.yaml) and can silently drop the
+      # generated Prisma engine — must disable it so Azure runs exactly what
+      # we built here. Set once in the Portal (see chat) or via az cli.
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: artsdiva-backend

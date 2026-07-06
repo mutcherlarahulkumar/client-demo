@@ -1,0 +1,74 @@
+name: Build and deploy Next.js app to Azure Web App - artsdiva-fe
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: artsdiva-fe
+  NODE_VERSION: '22.x'
+  PNPM_VERSION: '9'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: artsdiva-frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: artsdiva-frontend
+        run: pnpm install --frozen-lockfile
+
+      # NEXT_PUBLIC_* vars are inlined into the client bundle at build time —
+      # setting them as an Azure App Setting afterwards has no effect.
+      - name: Build Next.js
+        working-directory: artsdiva-frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: pnpm build
+
+      # next.config.ts sets output:"standalone" — this folder is a
+      # self-contained server with its own minimal node_modules, so Azure's
+      # zip-deploy has nothing fragile (like pnpm's symlinked node_modules)
+      # to lose in transit.
+      - name: Assemble standalone deployment package
+        working-directory: artsdiva-frontend
+        run: |
+          cp -r public .next/standalone/public
+          mkdir -p .next/standalone/.next
+          cp -r .next/static .next/standalone/.next/static
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Startup Command in Azure must be `node server.js` (see chat) and
+      # Oryx's own rebuild-on-deploy must be disabled, or Azure will try to
+      # npm-install this folder from scratch and ignore what was just built.
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: artsdiva-frontend/.next/standalone
