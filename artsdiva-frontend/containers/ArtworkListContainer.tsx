@@ -149,6 +149,7 @@ export function ArtworkListContainer() {
         <TextField
           size="small"
           select
+          label="Status"
           value={status}
           onChange={(e) => setStatus(e.target.value as ArtworkStatus | "")}
           sx={{ width: 180 }}

@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Dialog from "@mui/material/Dialog";
+import Paper from "@mui/material/Paper";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
@@ -45,7 +46,10 @@ export function ConfirmDialog({
               transition={{ duration: 0.2 }}
               style={{ borderRadius: 16 }}
             >
-              <div {...props}>{children}</div>
+              {/* Must actually be a Paper, not a bare div — Paper is what
+                  supplies the background color and elevation shadow; the
+                  Dialog-generated className only handles layout/position. */}
+              <Paper {...props}>{children}</Paper>
             </motion.div>
           )}
         >

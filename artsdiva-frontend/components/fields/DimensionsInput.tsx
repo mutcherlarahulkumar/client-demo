@@ -29,7 +29,7 @@ export function DimensionsInput({ value, onChange, errors, disabled }: Dimension
           error={!!errors?.width}
           helperText={errors?.width}
           disabled={disabled}
-          slotProps={{ htmlInput: { min: 0, step: 0.1 } }}
+          slotProps={{ htmlInput: { min: 0.1, max: 10000, step: 0.1 } }}
           sx={{ flex: 1 }}
         />
         <Box sx={{ pt: 1.2, color: "text.disabled", flexShrink: 0 }}>
@@ -44,7 +44,7 @@ export function DimensionsInput({ value, onChange, errors, disabled }: Dimension
           error={!!errors?.height}
           helperText={errors?.height}
           disabled={disabled}
-          slotProps={{ htmlInput: { min: 0, step: 0.1 } }}
+          slotProps={{ htmlInput: { min: 0.1, max: 10000, step: 0.1 } }}
           sx={{ flex: 1 }}
         />
         <FormControl size="small" sx={{ minWidth: 72 }}>
