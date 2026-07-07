@@ -2,6 +2,7 @@ import "dotenv/config";
 import express, { type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { MulterError } from "multer";
 import { prisma } from "./lib/prisma";
 import authRoutes from "./routes/auth.routes";
 import artistRoutes from "./routes/artist.routes";
@@ -79,6 +80,17 @@ app.use("/api/dashboard", dashboardRoutes);
 // Central error handler
 // ---------------------------------------------------------------------------
 app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof MulterError) {
+    const message =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "File is too large"
+        : err.code === "LIMIT_UNEXPECTED_FILE"
+          ? "Unsupported file type"
+          : "Upload failed";
+    res.status(400).json({ message });
+    return;
+  }
+
   const message = err instanceof Error ? err.message : String(err);
   const stack = err instanceof Error ? err.stack : undefined;
 

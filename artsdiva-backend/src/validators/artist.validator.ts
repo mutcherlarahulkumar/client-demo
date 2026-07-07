@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { contactInfoSchema, paginationQuerySchema, sortQuerySchema } from "./common.validator";
 
-export const createArtistSchema = z.object({
+const hasEmailOrPhone = (contactInfo?: z.infer<typeof contactInfoSchema>) =>
+  Boolean(contactInfo?.email || contactInfo?.phone);
+
+const artistBaseSchema = z.object({
   name: z
     .string()
     .min(2, "Name must be at least 2 characters")
@@ -21,7 +24,28 @@ export const createArtistSchema = z.object({
   }),
 });
 
-export const updateArtistSchema = createArtistSchema.partial();
+// Artists must be reachable: at least one of email or phone is required.
+export const createArtistSchema = artistBaseSchema.superRefine((data, ctx) => {
+  if (!hasEmailOrPhone(data.contactInfo)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["contactInfo"],
+      message: "Provide at least one of email or phone",
+    });
+  }
+});
+
+// On update, only enforce reachability when contactInfo is being changed —
+// otherwise a partial update (e.g. rename) would fail for no reason.
+export const updateArtistSchema = artistBaseSchema.partial().superRefine((data, ctx) => {
+  if (data.contactInfo !== undefined && !hasEmailOrPhone(data.contactInfo)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["contactInfo"],
+      message: "Provide at least one of email or phone",
+    });
+  }
+});
 
 export const listArtistsQuerySchema = paginationQuerySchema
   .extend({ search: z.string().optional() })

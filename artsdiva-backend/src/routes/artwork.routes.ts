@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authenticate, authorize } from "../middleware/auth.middleware";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { validate, validateQuery } from "../middleware/validate.middleware";
-import { upload } from "../middleware/upload.middleware";
+import { uploadImages } from "../middleware/upload.middleware";
 import {
   createArtworkSchema,
   listArtworksQuerySchema,
@@ -32,7 +32,7 @@ router.get("/:id", asyncHandler(getArtworkHandler));
 router.post("/", validate(createArtworkSchema), asyncHandler(createArtworkHandler));
 router.put("/:id", validate(updateArtworkSchema), asyncHandler(updateArtworkHandler));
 router.patch("/:id/status", validate(updateArtworkStatusSchema), asyncHandler(updateArtworkStatusHandler));
-router.post("/:id/images", upload.array("images", 10), asyncHandler(uploadArtworkImagesHandler));
+router.post("/:id/images", uploadImages.array("images", 10), asyncHandler(uploadArtworkImagesHandler));
 router.delete("/:id", authorize("ADMIN"), asyncHandler(deleteArtworkHandler));
 
 export default router;

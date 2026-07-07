@@ -33,9 +33,27 @@ const validationSchema = Yup.object({
     .required("Commission % is required"),
   commissionTerms: Yup.string().min(1).max(500).required("Commission terms required"),
   mouStatus: Yup.mixed<MouStatus>().oneOf(["SIGNED", "PENDING", "NOT_REQUIRED"]).required(),
-  email: Yup.string().transform((v) => (v === "" ? undefined : v)).email("Invalid email").optional(),
+  email: Yup.string()
+    .transform((v) => (v === "" ? undefined : v))
+    .email("Invalid email")
+    .test(
+      "email-or-phone",
+      "Provide an email or a phone number",
+      function (value) {
+        return Boolean(value || this.parent.phone);
+      },
+    ),
   phoneCountryCode: Yup.string().matches(PHONE_CODE_RE, "Invalid dial code").optional(),
-  phone: Yup.string().transform((v) => (v === "" ? undefined : v)).matches(PHONE_RE, "Invalid phone number").optional(),
+  phone: Yup.string()
+    .transform((v) => (v === "" ? undefined : v))
+    .matches(PHONE_RE, "Invalid phone number")
+    .test(
+      "email-or-phone",
+      "Provide an email or a phone number",
+      function (value) {
+        return Boolean(value || this.parent.email);
+      },
+    ),
   address: Yup.string().max(500).optional(),
 });
 
@@ -225,7 +243,7 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
 
                   {/* Contact section */}
                   <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                    Contact Information
+                    Contact Information (email or phone required)
                   </Typography>
 
                   <Box>

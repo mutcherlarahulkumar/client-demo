@@ -80,7 +80,8 @@ share a registrable domain, so it just works across the two subdomains.
   | `JWT_EXPIRES_IN` | `7d` |
   | `NODE_ENV` | `production` |
   | `PORT` | `4000` |
-  | `BLOB_READ_WRITE_TOKEN` | from Vercel Blob (step 4) |
+  | `AZURE_STORAGE_CONNECTION_STRING` | from Azure Storage account (step 4) |
+  | `AZURE_STORAGE_CONTAINER_NAME` | `images` |
   | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` / `SEED_ADMIN_NAME` | your first admin login |
 
 - Once it's deployed, Render gives you a `*.onrender.com` URL first — add
@@ -104,12 +105,20 @@ share a registrable domain, so it just works across the two subdomains.
 - Add your **custom domain** `app.artsdiva.com` in Vercel's project settings,
   then point a CNAME at the hostname Vercel gives you.
 
-### 4. Image storage — Vercel Blob
+### 4. Image storage — Azure Blob Storage
 
-- In the Vercel dashboard: Storage → create a **Blob** store.
-- Copy the generated `BLOB_READ_WRITE_TOKEN` into Render's env vars (step 2)
-  — the backend calls Vercel Blob directly over HTTP, so this works
-  regardless of where the backend itself is hosted.
+- In the Azure Portal: create a **Storage account**, then a container named
+  `images` inside it (the backend also creates it automatically on first
+  upload if missing, with anonymous **blob-level** read access — individual
+  files are reachable by their direct URL, but the container can't be
+  listed/browsed).
+- Copy the account's **connection string** (Storage account → Access keys)
+  into Render's env vars as `AZURE_STORAGE_CONNECTION_STRING` (step 2) — the
+  backend uploads directly to Azure Blob Storage over HTTPS, so this works
+  regardless of where the backend itself is hosted. The connection string
+  contains the account key — treat it as a secret, never commit it or paste
+  it anywhere outside Render's env var UI, and rotate the key in Azure
+  (Access keys → Regenerate) if it's ever exposed.
 
 ### 5. Verify
 
