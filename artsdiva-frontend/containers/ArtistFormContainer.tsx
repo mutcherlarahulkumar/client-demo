@@ -186,7 +186,7 @@ export function ArtistFormContainer({ artistId }: ArtistFormContainerProps) {
                   </Box>
 
                   {/* Commission % + MOU Status side by side */}
-                  <Box sx={{ display: "flex", gap: 2 }}>
+                  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
                     <Box sx={{ flex: 1 }}>
                       <FieldLabel label="Artist Share (%)" required info="The artist's percentage of sale/lease revenue. Example: 70 for a 70/30 split (artist keeps 70%, gallery keeps 30%)." />
                       <TextField

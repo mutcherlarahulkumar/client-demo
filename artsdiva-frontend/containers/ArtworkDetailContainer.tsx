@@ -124,7 +124,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
         </Box>
 
         {/* Header */}
-        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 3 }}>
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>{artwork.title}</Typography>
             {artwork.artist && (
@@ -160,7 +160,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
           </Box>
         </Box>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3, mb: 3 }}>
           {/* Left: Image gallery */}
           <Card>
             <CardContent sx={{ p: 2 }}>
@@ -339,7 +339,7 @@ export function ArtworkDetailContainer({ artworkId }: ArtworkDetailContainerProp
       <Box sx={{ px: { xs: 2.5, md: 4 }, pb: { xs: 3, md: 4 }, maxWidth: 1100, mx: "auto" }}>
         <Card variant="outlined">
           <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: leaseOpen ? 2 : 0 }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: leaseOpen ? 2 : 0 }}>
               <Typography variant="subtitle2" sx={{ color: "text.secondary", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
                 Lease this Artwork
               </Typography>

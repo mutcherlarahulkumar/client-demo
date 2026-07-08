@@ -48,18 +48,18 @@ export function DocumentLogSection({
 }: DocumentLogSectionProps) {
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, mb: 1.5 }}>
         <Typography variant="h6">
           Documents
           {!isLoading && <Chip label={documents.length} size="small" sx={{ ml: 1 }} />}
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
           <TextField
             select
             size="small"
             value={fileType}
             onChange={(e) => onFileTypeChange(e.target.value as DocumentFileType)}
-            sx={{ minWidth: 160 }}
+            sx={{ minWidth: { xs: "100%", sm: 160 } }}
           >
             {Object.entries(FILE_TYPE_LABELS).map(([value, label]) => (
               <MenuItem key={value} value={value}>

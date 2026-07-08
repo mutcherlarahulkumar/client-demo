@@ -73,7 +73,7 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
         {/* Header card */}
         <Card sx={{ mb: 3 }}>
           <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
               <Avatar
                 sx={{
                   width: 64,
@@ -86,7 +86,7 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
               >
                 {initials(client.name)}
               </Avatar>
-              <Box sx={{ flex: 1 }}>
+              <Box sx={{ flex: 1, minWidth: { xs: "100%", sm: 0 } }}>
                 <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>{client.name}</Typography>
                 {client.contactInfo?.email && (
                   <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>{client.contactInfo.email}</Typography>
@@ -118,7 +118,7 @@ export function ClientDetailContainer({ clientId }: ClientDetailContainerProps) 
         </Card>
 
         {/* Info row */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2.5, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2.5, mb: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="subtitle2" sx={{ color: "text.secondary", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", mb: 1.5 }}>

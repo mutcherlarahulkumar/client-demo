@@ -174,7 +174,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
                   </Box>
 
                   {/* Medium + Year */}
-                  <Box sx={{ display: "flex", gap: 2 }}>
+                  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
                     <Box sx={{ flex: 1 }}>
                       <FieldLabel label="Medium" required info="The materials and surface used. Example: Oil on canvas, Bronze, Watercolour on paper" />
                       <TextField
@@ -216,7 +216,7 @@ export function ArtworkFormContainer({ artworkId }: ArtworkFormContainerProps) {
                   <Divider />
 
                   {/* Acquisition Date + Status */}
-                  <Box sx={{ display: "flex", gap: 2 }}>
+                  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
                     <Box sx={{ flex: 1 }}>
                       <FieldLabel label="Acquisition Date" required info="The date the gallery received or purchased this artwork, not the date it was painted." />
                       <DatePicker

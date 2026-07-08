@@ -125,6 +125,8 @@ export function ArtistListContainer() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1.5,
           mb: 3,
         }}
       >
@@ -144,7 +146,7 @@ export function ArtistListContainer() {
             </Typography>
           )}
         </Box>
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
           <Button
             variant="outlined"
             startIcon={<FileDownloadOutlinedIcon />}
@@ -170,7 +172,7 @@ export function ArtistListContainer() {
           placeholder="Search artists by name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          sx={{ width: 320 }}
+          sx={{ width: { xs: "100%", sm: 320 } }}
           slotProps={{
             input: {
               startAdornment: (
@@ -355,6 +357,7 @@ export function ArtistListContainer() {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
         rowsPerPageOptions={[10, 20, 50, 100]}
+        sx={{ "& .MuiTablePagination-toolbar": { flexWrap: { xs: "wrap", sm: "nowrap" }, justifyContent: { xs: "center", sm: "flex-end" } }, "& .MuiTablePagination-spacer": { display: { xs: "none", sm: "block" } } }}
       />
 
       <ConfirmDialog

@@ -62,7 +62,7 @@ export function UserListContainer() {
 
   return (
     <Box sx={{ px: { xs: 2.5, md: 4 }, py: { xs: 3, md: 4 }, maxWidth: 1200, mx: "auto" }}>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, mb: 3 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>Users</Typography>
           {!isLoading && (
@@ -82,7 +82,7 @@ export function UserListContainer() {
           placeholder="Search users by name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          sx={{ width: 320 }}
+          sx={{ width: { xs: "100%", sm: 320 } }}
           slotProps={{
             input: {
               startAdornment: (

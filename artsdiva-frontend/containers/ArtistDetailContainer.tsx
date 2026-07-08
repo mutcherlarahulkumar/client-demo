@@ -94,7 +94,7 @@ export function ArtistDetailContainer({
       {/* Header card */}
       <Card variant="outlined" sx={{ mb: 2.5 }}>
         <CardContent sx={{ p: 2.5 }}>
-          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
             <Avatar
               sx={{
                 width: 56,
@@ -107,7 +107,7 @@ export function ArtistDetailContainer({
               {initials(artist.name)}
             </Avatar>
 
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ flex: 1, minWidth: { xs: "100%", sm: 0 } }}>
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
                 {artist.name}
               </Typography>
@@ -152,7 +152,7 @@ export function ArtistDetailContainer({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
           gap: 2,
           mb: 2.5,
         }}
@@ -282,6 +282,8 @@ export function ArtistDetailContainer({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1,
           mb: 1.5,
         }}
       >

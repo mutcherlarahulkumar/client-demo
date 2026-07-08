@@ -117,7 +117,7 @@ export function ArtworkListContainer() {
 
   return (
     <Box sx={{ px: { xs: 2.5, md: 4 }, py: { xs: 3, md: 4 }, maxWidth: 1200, mx: "auto" }}>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, mb: 3 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>Artworks</Typography>
           {!isLoading && (
@@ -126,7 +126,7 @@ export function ArtworkListContainer() {
             </Typography>
           )}
         </Box>
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
           <Button variant="outlined" startIcon={<FileDownloadOutlinedIcon />} onClick={() => void handleExport()} disabled={isExporting}>
             {isExporting ? "Exporting…" : "Export CSV"}
           </Button>
@@ -136,13 +136,13 @@ export function ArtworkListContainer() {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", gap: 1.5, mb: 2.5 }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, mb: 2.5 }}>
         <TextField
           size="small"
           placeholder="Search by title or medium..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          sx={{ width: 300 }}
+          sx={{ width: { xs: "100%", sm: 300 } }}
           slotProps={{
             input: {
               startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" color="action" /></InputAdornment>,
@@ -155,7 +155,7 @@ export function ArtworkListContainer() {
           label="Status"
           value={status}
           onChange={(e) => setStatus(e.target.value as ArtworkStatus | "")}
-          sx={{ width: 180 }}
+          sx={{ width: { xs: "100%", sm: 180 } }}
         >
           <MenuItem value="">All Statuses</MenuItem>
           <MenuItem value="IN_COLLECTION">In Collection</MenuItem>
@@ -284,6 +284,7 @@ export function ArtworkListContainer() {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
         rowsPerPageOptions={[10, 20, 50, 100]}
+        sx={{ "& .MuiTablePagination-toolbar": { flexWrap: { xs: "wrap", sm: "nowrap" }, justifyContent: { xs: "center", sm: "flex-end" } }, "& .MuiTablePagination-spacer": { display: { xs: "none", sm: "block" } } }}
       />
 
       <ConfirmDialog
