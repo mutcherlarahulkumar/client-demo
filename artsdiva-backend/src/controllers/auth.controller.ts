@@ -8,15 +8,17 @@ const isProduction = process.env.NODE_ENV === "production";
 // Mirrors JWT_EXPIRES_IN's default so the cookie doesn't outlive the token.
 const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-// Frontend and backend are on different domains in production (Vercel /
-// Render, or any two hosts without a shared apex domain) -- SameSite=None
-// is required for the browser to send the cookie on cross-site fetch()
-// calls, which in turn requires Secure. Locally, frontend/backend are both
-// "localhost" (same-site regardless of port), so Lax + non-Secure is fine
-// over plain http. If frontend and backend ever share an apex domain
-// (app.example.com / api.example.com), Lax works there too and is the
-// safer default -- swap this back if/when that's set up.
-const COOKIE_SAME_SITE = isProduction ? "none" : "lax";
+// COOKIE_DOMAIN should be the shared apex/parent domain of the frontend and
+// backend (e.g. ".bharatbytetech.com" if the frontend is
+// artsdiva.bharatbytetech.com and the backend is api.bharatbytetech.com).
+// When set, the cookie is first-party from the browser's perspective, so
+// SameSite=Lax works everywhere -- including iOS Safari and Chrome
+// Incognito, both of which block SameSite=None third-party cookies. Without
+// it (e.g. frontend/backend on totally unrelated domains, or local dev),
+// we fall back to SameSite=None so cross-site auth still functions, but
+// this fallback is best-effort only -- see docs/DEPLOYMENT.md.
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+const COOKIE_SAME_SITE = !isProduction ? "lax" : COOKIE_DOMAIN ? "lax" : "none";
 
 export async function loginHandler(req: Request, res: Response): Promise<void> {
   const input = req.body as LoginDTO;
@@ -29,6 +31,7 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
       secure: isProduction,
       sameSite: COOKIE_SAME_SITE,
       maxAge: COOKIE_MAX_AGE_MS,
+      domain: COOKIE_DOMAIN,
     });
 
     res.status(200).json({ user });
@@ -127,6 +130,7 @@ export function logoutHandler(_req: Request, res: Response): void {
     httpOnly: true,
     secure: isProduction,
     sameSite: COOKIE_SAME_SITE,
+    domain: COOKIE_DOMAIN,
   });
   res.status(200).json({ message: "Logged out" });
 }

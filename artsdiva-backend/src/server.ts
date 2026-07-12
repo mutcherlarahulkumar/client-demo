@@ -37,11 +37,21 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
 });
 
 // ---------------------------------------------------------------------------
-// CORS — reflect origin header so credentialed cross-site requests work.
+// CORS — only the configured frontend origin(s) may make credentialed
+// requests. FRONTEND_ORIGIN is a comma-separated list so previews (e.g. a
+// Vercel preview deployment URL) can be added alongside the production
+// custom domain. Falls back to reflecting the request origin (old
+// behaviour) if unset, so local dev / a fresh deploy doesn't hard-fail —
+// but production should always set this explicitly. See docs/DEPLOYMENT.md.
 // ---------------------------------------------------------------------------
+const allowedOrigins = (process.env.FRONTEND_ORIGIN ?? "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: true,
+    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
     credentials: true,
   })
 );
