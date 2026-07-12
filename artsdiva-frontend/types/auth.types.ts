@@ -21,6 +21,7 @@ export interface AuthenticatedUser {
 
 export interface LoginResponse {
   user: AuthenticatedUser;
+  token: string;
 }
 
 export interface CreateUserResponse {

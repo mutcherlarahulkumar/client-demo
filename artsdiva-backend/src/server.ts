@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express, { type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import { MulterError } from "multer";
 import { prisma } from "./lib/prisma";
 import authRoutes from "./routes/auth.routes";
@@ -37,26 +36,12 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
 });
 
 // ---------------------------------------------------------------------------
-// CORS — only the configured frontend origin(s) may make credentialed
-// requests. FRONTEND_ORIGIN is a comma-separated list so previews (e.g. a
-// Vercel preview deployment URL) can be added alongside the production
-// custom domain. Falls back to reflecting the request origin (old
-// behaviour) if unset, so local dev / a fresh deploy doesn't hard-fail —
-// but production should always set this explicitly. See docs/DEPLOYMENT.md.
+// CORS — open to any origin. Auth is a Bearer token (see auth.middleware.ts),
+// not a cookie, so there's no credentialed-cookie/CORS interaction to lock
+// down here the way there would be with cookie auth.
 // ---------------------------------------------------------------------------
-const allowedOrigins = (process.env.FRONTEND_ORIGIN ?? "")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
-
-app.use(
-  cors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
-    credentials: true,
-  })
-);
+app.use(cors({ origin: "*" }));
 app.use(express.json());
-app.use(cookieParser());
 
 // ---------------------------------------------------------------------------
 // Health endpoints

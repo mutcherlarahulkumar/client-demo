@@ -11,9 +11,6 @@ if (!JWT_SECRET_ENV) {
 // Re-bound to a definite string so callers below don't carry `| undefined`.
 const JWT_SECRET: string = JWT_SECRET_ENV;
 
-// Name of the httpOnly cookie the JWT is stored in.
-export const AUTH_COOKIE_NAME = "artsdiva_token";
-
 export function signToken(payload: JwtPayload): string {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
 }

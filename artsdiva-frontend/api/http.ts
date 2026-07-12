@@ -1,6 +1,8 @@
 // Shared fetch wrapper used by every api/*.api.ts file. Not itself an
 // "api file" for a domain — those live alongside it (auth.api.ts, etc.).
 
+import { getAuthToken } from "@artsdiva/utils/authToken";
+
 // NEXT_PUBLIC_API_URL is inlined at BUILD TIME, not read at runtime — if a
 // deployment's env var wasn't set when it was built, this is `undefined` no
 // matter what you set afterward until the next build. Only the local dev
@@ -46,10 +48,14 @@ export async function apiRequest<TResponse>(
   // browser needs to set its own multipart boundary.
   const isFormData = options.body instanceof FormData;
 
+  const token = getAuthToken();
+  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    credentials: "include",
-    headers: isFormData ? { ...options.headers } : { "Content-Type": "application/json", ...options.headers },
+    headers: isFormData
+      ? { ...authHeaders, ...options.headers }
+      : { "Content-Type": "application/json", ...authHeaders, ...options.headers },
   });
 
   const body: unknown = await res.json().catch(() => null);

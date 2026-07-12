@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from "@artsdiva/api/auth.api";
 import { ApiError, type FieldErrors } from "@artsdiva/api/http";
+import { clearAuthToken, getAuthToken, setAuthToken } from "@artsdiva/utils/authToken";
 import type { AuthenticatedUser, LoginDTO } from "@artsdiva/types/auth.types";
 
 export interface AuthContextValue {
@@ -27,6 +28,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
 
   useEffect(() => {
+    // No stored token means no session to restore -- skip the /me round
+    // trip entirely (it would just 401).
+    if (!getAuthToken()) {
+      setIsLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     getCurrentUser()
@@ -34,7 +42,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (!cancelled) setUser(currentUser);
       })
       .catch(() => {
-        if (!cancelled) setUser(null);
+        if (!cancelled) {
+          clearAuthToken();
+          setUser(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -50,7 +61,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setFieldErrors(null);
     setIsLoading(true);
     try {
-      const { user: loggedInUser } = await loginRequest(payload);
+      const { user: loggedInUser, token } = await loginRequest(payload);
+      setAuthToken(token);
       setUser(loggedInUser);
       return true;
     } catch (err) {
@@ -67,8 +79,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const logout = useCallback(async (): Promise<void> => {
-    await logoutRequest();
-    setUser(null);
+    try {
+      await logoutRequest();
+    } finally {
+      clearAuthToken();
+      setUser(null);
+    }
   }, []);
 
   return (

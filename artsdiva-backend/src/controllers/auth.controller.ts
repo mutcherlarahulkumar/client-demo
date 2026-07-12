@@ -1,24 +1,7 @@
 import type { Request, Response } from "express";
-import { AUTH_COOKIE_NAME } from "../lib/jwt";
 import * as authService from "../services/auth.service";
 import type { ChangePasswordDTO, CreateUserDTO, LoginDTO } from "../types/auth.types";
 import type { ListUsersQuery } from "../validators/auth.validator";
-
-const isProduction = process.env.NODE_ENV === "production";
-// Mirrors JWT_EXPIRES_IN's default so the cookie doesn't outlive the token.
-const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
-
-// COOKIE_DOMAIN should be the shared apex/parent domain of the frontend and
-// backend (e.g. ".bharatbytetech.com" if the frontend is
-// artsdiva.bharatbytetech.com and the backend is api.bharatbytetech.com).
-// When set, the cookie is first-party from the browser's perspective, so
-// SameSite=Lax works everywhere -- including iOS Safari and Chrome
-// Incognito, both of which block SameSite=None third-party cookies. Without
-// it (e.g. frontend/backend on totally unrelated domains, or local dev),
-// we fall back to SameSite=None so cross-site auth still functions, but
-// this fallback is best-effort only -- see docs/DEPLOYMENT.md.
-const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
-const COOKIE_SAME_SITE = !isProduction ? "lax" : COOKIE_DOMAIN ? "lax" : "none";
 
 export async function loginHandler(req: Request, res: Response): Promise<void> {
   const input = req.body as LoginDTO;
@@ -26,15 +9,12 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
   try {
     const { token, user } = await authService.login(input);
 
-    res.cookie(AUTH_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: COOKIE_SAME_SITE,
-      maxAge: COOKIE_MAX_AGE_MS,
-      domain: COOKIE_DOMAIN,
-    });
-
-    res.status(200).json({ user });
+    // Token goes in the response body, not a cookie -- the client stores it
+    // (localStorage) and sends it back as `Authorization: Bearer <token>`.
+    // See docs/DEPLOYMENT.md for why: cross-domain cookies get silently
+    // dropped by iOS Safari and Chrome Incognito's third-party-cookie
+    // blocking, regardless of SameSite/Secure settings.
+    res.status(200).json({ user, token });
   } catch (err) {
     if (err instanceof authService.InvalidCredentialsError) {
       res.status(401).json({ message: err.message });
@@ -124,13 +104,7 @@ export async function deactivateUserHandler(req: Request, res: Response): Promis
 }
 
 export function logoutHandler(_req: Request, res: Response): void {
-  // Must match the attributes the cookie was set with, or some browsers
-  // won't recognize it as the same cookie to clear.
-  res.clearCookie(AUTH_COOKIE_NAME, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: COOKIE_SAME_SITE,
-    domain: COOKIE_DOMAIN,
-  });
+  // Nothing to clear server-side -- the token lives in the client's
+  // localStorage; the frontend deletes it on logout.
   res.status(200).json({ message: "Logged out" });
 }
